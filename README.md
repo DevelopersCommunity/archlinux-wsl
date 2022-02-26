@@ -55,7 +55,7 @@ You can package your own custom image with the following steps. More details are
 
 1. Use the command `wsl -d ArchLinux` to run the newly imported Arch Linux distribution.
 1. Make any customization you want to your distro.
-1. When you are done with the customization, logout from `WSL` and run the following commands to export the image. You can install [7-zip](https://7-zip.org/) by running `winget -e --id 7zip.7zip`.
+1. When you are done with the customization, logout from `WSL` and run the following commands to export the image. You can install [7-zip](https://7-zip.org/) by running `winget install -e --id 7zip.7zip`.
 
 ```powershell
 wsl --terminate ArchLinux
@@ -71,7 +71,7 @@ wsl --export ArchLinux .\install.tar
 If you don't have Visual Studio, you can download the free Community edition with `winget`:
 
 ```powershell
-winget -e --id Microsoft.VisualStudio.2022.Community
+winget install -e --id Microsoft.VisualStudio.2022.Community
 
 # Run the following command with an elevated PowerShell session
 # to install the required workloads to build this project

@@ -1,5 +1,5 @@
 Param(
-    $CertFile = ".\DistroLauncher-Appx_TemporaryKey.cer",
+    $CertFile = ".\DistroLauncher-Appx_TemporaryKey.crt",
     $CertStoreLocation = "cert:\LocalMachine\TrustedPeople"
 )
 

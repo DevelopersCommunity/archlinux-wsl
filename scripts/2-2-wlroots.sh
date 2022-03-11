@@ -1,45 +1,15 @@
 #!/bin/bash
 #
-# Sway installation.
+# Workaround to make wlroots work with WSL2.
 
-readonly config_home=${XDG_CONFIG_HOME:-$HOME/.config}
-
-sudo pacman -S --noconfirm sway noto-fonts foot wayvnc pipewire pipewire-pulse \
-  pipewire-jack pipewire-media-session
-sudo pacman -S --noconfirm --asdeps dmenu wl-clipboard xorg-xwayland
-
-mkdir -p "$config_home/sway"
-sway_config=$(cat /etc/sway/config)
-sway_config=${sway_config/set \$mod Mod4/set \$mod Mod1}
-echo "${sway_config/get_outputs/$'get_outputs\noutput HEADLESS-1 resolution 1600x900 position 1600,0'}" \
-  > "$config_home/sway/config"
-echo "exec wayvnc 0.0.0.0" >> "$config_home/sway/config"
-
-cat << END >> "$HOME/.bashrc"
-
-export WLR_BACKENDS=headless
-if (( SHLVL == 1 )); then
-  export PATH="\$HOME/.local/bin":\$PATH
-fi
-END
-
-mkdir -p "$HOME/.local/bin"
-cat << END >> "$HOME/.local/bin/s"
-#!/bin/bash
-#
-# Start Sway with a D-Bus session instance
-
-dbus-run-session sway
-END
-
-chmod +x "$HOME/.local/bin/s"
+set -o errexit -o nounset -o pipefail
 
 sudo pacman -S --needed --noconfirm base-devel
 sudo pacman -S --noconfirm git cmake wayland-protocols ffmpeg vulkan-headers \
   glslang meson
 
 wlrootspatch=$(mktemp -q)
-cat << END > "$wlrootspatch"
+cat << END > "${wlrootspatch}"
 diff --git a/examples/meson.build b/examples/meson.build
 index 26d103bb..690ba207 100644
 --- a/examples/meson.build
@@ -78,14 +48,14 @@ index 873fde8d..f4aeabb1 100644
  		return false;
 END
 
-mkdir -p "$HOME/repos"
+mkdir -p "${HOME}/repos"
 pushd .
-cd "$HOME/repos" || exit 1
+cd "${HOME}/repos" || exit 1
 git clone https://gitlab.freedesktop.org/wlroots/wlroots.git
 cd wlroots || exit 1
 git checkout 0.15.1
-git apply "$wlrootspatch"
-rm "$wlrootspatch"
+git apply "${wlrootspatch}"
+rm "${wlrootspatch}"
 meson build/
 ninja -C build/
 sudo ninja -C build/ install
@@ -93,3 +63,5 @@ cd /usr/lib || exit 1
 sudo rm libwlroots.so.10
 sudo ln -s ../local/lib/libwlroots.so.10 libwlroots.so.10
 popd || exit 1
+
+sudo dbus-uuidgen --ensure

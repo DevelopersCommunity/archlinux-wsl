@@ -10,7 +10,7 @@ The Arch Linux installer is packaged with the [MSIX format](https://docs.microso
 
 ```powershell
 Import-Certificate `
-    -FilePath .\DistroLauncher-Appx_TemporaryKey.cer `
+    -FilePath .\DistroLauncher-Appx_TemporaryKey.crt `
     -CertStoreLocation cert:\LocalMachine\TrustedPeople
 ```
 
@@ -20,12 +20,14 @@ The image installed is the Arch Linux docker base image available at the [Arch L
 - [sudo package](https://archlinux.org/packages/core/x86_64/sudo/) installed
 - `wheel` group added to `sudoers`
 
-The script used to build the image is available in the [scripts](./scripts/0-arch.sh) directory.
+The script used to build the image is available in the [scripts](./scripts/1-arch.sh) directory.
 
 ```bash
 #!/bin/bash
 #
-# Prepare Arch Linux WSL image
+# Prepare Arch Linux WSL image.
+
+set -o errexit -o nounset
 
 pacman=$(cat /etc/pacman.conf)
 echo "${pacman%$'\[options\]\nNoExtract*'}" > /etc/pacman.conf
@@ -39,6 +41,8 @@ cat << END > "$visudo"
 #
 # Add wheel group to sudoers.
 
+set -o errexit -o nounset -o pipefail
+
 echo "%wheel ALL=(ALL:ALL) ALL" > "\$2"
 END
 
@@ -47,19 +51,25 @@ chmod +x "$visudo"
 rm "$visudo"
 ```
 
+## Post-installation
+
+- [Configure Pacman mirrors](https://wiki.archlinux.org/title/mirrors)
+- [Configure Pacman parallel downloads](https://wiki.archlinux.org/title/Pacman#Enabling_parallel_downloads)
+- [Install a text editor](https://wiki.archlinux.org/title/Category:Text_editors)
+
 ## Sway window manager
 
-It is possible to install and run the [Sway](https://swaywm.org/) tiling Wayland compositor in your WSL environment, but we need to apply a small patch to the [wlroots library](https://gitlab.freedesktop.org/wlroots/wlroots/) to fix an incompatibility with [WSLg](https://github.com/microsoft/wslg).
+It is possible to install and run the [Sway](https://swaywm.org/) tiling [Wayland](https://wayland.freedesktop.org/) compositor in your WSL environment, but we need to apply a small patch to the [wlroots library](https://gitlab.freedesktop.org/wlroots/wlroots/) to fix an incompatibility with [WSLg](https://github.com/microsoft/wslg).
 
-WSLg creates a soft link to the Unix-domain socket `/tmp/.X11-unix` used by [Xorg](https://www.x.org/) for local [network connections](https://www.x.org/archive/X11R6.8.0/doc/Xorg.1.html#sect4). This breaks `wlroots` at <https://gitlab.freedesktop.org/wlroots/wlroots/-/blob/0.15.1/xwayland/sockets.c#L94-97>.
+WSLg creates a soft link to the Unix-domain socket `/tmp/.X11-unix` used by [Xorg](https://www.x.org/) for [local network connections](https://www.x.org/archive/X11R6.8.0/doc/Xorg.1.html#sect4). This breaks `wlroots` at <https://gitlab.freedesktop.org/wlroots/wlroots/-/blob/0.15.1/xwayland/sockets.c#L94-97>.
 
-The script [`1-sway.sh`](./scripts/1-sway.sh) installs Sway with the required dependencies and applies a patch to the `wlroots` library to fix that issue with WSLg. It also configures Sway to run in headless mode with a slightly modified version of the [default configuration file](https://github.com/swaywm/sway/blob/v1.7/config.in):
+The script [`2-sway.sh`](./scripts/2-sway.sh) installs Sway with the required dependencies and applies a patch to the `wlroots` library to fix that issue with WSLg. It also configures Sway to run in headless mode with a slightly modified version of the [default configuration file](https://github.com/swaywm/sway/blob/v1.7/config.in):
 
 - Set _ALT_ as the modifier key
 - Set the resolution for the _HEADLESS-1_ output to 1600x900
 - Launch [wayvnc](https://github.com/any1/wayvnc)
 
-It is possible to run Sway with WSLg (unset the `WLR_BACKENDS` environment variable if you want to try), but in my case it spawns a Window without title bar and I couldn't move it.
+It is possible to run Sway with WSLg (unset the `WLR_BACKENDS` environment variable if you want to try), but in my case it spawns a window without title bar and I couldn't move it.
 
 To improve the experience, the script installs _wayvnc_ to provide VNC access to Sway. To make the configuration required to access the VNC server simpler, _wayvnc_ is configured to accept unauthenticated connections from any interface. This shouldn't be an issue because WSL2 distros by default can't be accessed by your LAN. But if you [enable LAN access](https://docs.microsoft.com/windows/wsl/networking#accessing-a-wsl-2-distribution-from-your-local-area-network-lan) to the VNC port of your Arch Linux distro, you will need to implement some kind of [user authentication and encryption to protect your VNC session](https://github.com/any1/wayvnc#running).
 
@@ -145,7 +155,20 @@ C:.
 
 Use the Windows Start menu to open the "Developer Command Prompt for Visual Studio", go to the root folder of this project and run `.\build.bat rel`.
 
-Once you've completed the build, the packaged `MSIX` should be placed in the folder `x64\Release\DistroLauncher-Appx` and should be named something like `DistroLauncher-Appx_1.0.XXXXX.0_x64.msix`. Simply double click that `MSIX` file to open the side-loading dialog.
+Once you've completed the build, the packaged `MSIX` should be placed in the folder `x64\Release\DistroLauncher-Appx` and should be named something like `DistroLauncher-Appx_1.1.XXXXX.0_x64.msix`.
+
+Before using the package, you need to import the certificate used to sign it. You can extract the certificate with _Git Bash_ and [OpenSSL](https://www.openssl.org/):
+
+```bash
+openssl pkcs12 \
+    -in path/to/DistroLauncher-Appx_TemporaryKey.pfx \
+    -out path/to/DistroLauncher-Appx_TemporaryKey.crt \
+    -nokeys
+```
+
+After extracting the certificate, you can import it to a certificate store with the same command described in the [installation section](#installation).
+
+With the certificate installed, simply double click the `MSIX` file to start your custom distro installation process.
 
 ## Arch Linux trademark
 

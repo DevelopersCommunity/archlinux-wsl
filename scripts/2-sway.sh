@@ -4,12 +4,20 @@
 
 set -o errexit -o nounset
 
-readonly config_home=${XDG_CONFIG_HOME:-$HOME/.config}
+readonly config_home=${XDG_CONFIG_HOME:-${HOME}/.config}
+
+if [[ -f /etc/systemd/system/pacman-init.service ]]; then
+  until systemctl is-active pacman-init.service; do
+    sleep 1
+  done
+  sudo systemctl disable /etc/systemd/system/pacman-init.service
+  sudo rm /etc/systemd/system/pacman-init.service
+fi
 
 sudo pacman -Syu --noconfirm
-sudo pacman -S --noconfirm sway noto-fonts foot wayvnc pipewire pipewire-pulse \
-  pipewire-jack pipewire-media-session
-sudo pacman -S --noconfirm --asdeps dmenu wl-clipboard xorg-xwayland
+sudo pacman -S --needed --noconfirm sway noto-fonts foot wayvnc dmenu git \
+  pipewire pipewire-jack wireplumber neovim-qt bash-completion git dmenu \
+  wl-clipboard xorg-xwayland base-devel
 
 mkdir -p "${config_home}/sway"
 sway_config=$(cat /etc/sway/config)
@@ -24,6 +32,8 @@ fi
 
 cat << END >> "${HOME}/.bashrc"
 
+export EDITOR=/bin/nvim
+
 if (( SHLVL == 1 )); then
   export PATH="\${HOME}/.local/bin":\${PATH}
 fi
@@ -35,9 +45,11 @@ cat << END > "${HOME}/.local/bin/s"
 #
 # Start Sway with a D-Bus session instance
 
+set -o errexit -o nounset
+
 cd "\${HOME}" || exit 1
 
-if [[ -z "\${DBUS_SESSION_BUS_ADDRESS}" ]]; then
+if [[ -z "\${DBUS_SESSION_BUS_ADDRESS:-}" ]]; then
   XDG_CURRENT_DESKTOP=sway XDG_SESSION_TYPE=wayland WLR_BACKENDS=headless \\
     dbus-run-session sway
 else
@@ -50,8 +62,9 @@ chmod +x "${HOME}/.local/bin/s"
 scriptdir=$(dirname "$0")
 readonly scriptdir
 if [[ $(cat /proc/sys/kernel/osrelease) =~ .*WSL2.* ]]; then
-  bash "${scriptdir}/2-2-wlroots.sh"
+  bash "${scriptdir}/2-wsl-wlroots.sh"
+  bash "${scriptdir}/2-wsl-pacmanmirrorlist.sh"
 else
-  bash "${scriptdir}/2-2-pulseaudio.sh"
+  bash "${scriptdir}/2-hyperv-pulseaudio.sh"
   sudo reboot
 fi

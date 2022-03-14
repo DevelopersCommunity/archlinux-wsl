@@ -18,6 +18,12 @@ namespace DistributionInfo
     // The title bar for the console window while the distribution is installing.
     const std::wstring WindowTitle = L"Arch Linux - Unofficial";
 
+    // Initialize Pacman mirrorlist and keyring
+    bool InitializePacman();
+
+    // Generate D-Bus UUID
+    bool GenerateDBusUuid();
+
     // Create and configure a user account.
     bool CreateUser(std::wstring_view userName);
 

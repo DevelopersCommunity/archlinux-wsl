@@ -36,6 +36,16 @@ HRESULT InstallDistribution(bool createUser)
         return hr;
     }
 
+    // Initialize Pacman mirrorlist and keyring
+    if (!DistributionInfo::InitializePacman()) {
+        return E_FAIL;
+    }
+
+    // Generate D-Bus UUID
+    if (!DistributionInfo::GenerateDBusUuid()) {
+        return E_FAIL;
+    }
+
     // Create a user account.
     if (createUser) {
         Helpers::PrintMessage(MSG_CREATE_USER_PROMPT);

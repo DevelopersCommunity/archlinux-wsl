@@ -18,13 +18,47 @@ bool DistributionInfo::CreateUser(std::wstring_view userName)
 
     commandLine = L"/usr/sbin/passwd ";
     commandLine += userName;
+    const wchar_t* passwd = commandLine.c_str();
+    do
+    {
+        hr = g_wslApi.WslLaunchInteractive(passwd, true, &exitCode);
+    } while ((FAILED(hr)) || (exitCode != 0));
+
+    return true;
+}
+
+bool DistributionInfo::InitializePacman()
+{
+    // https://wiki.archlinux.org/title/Reflector
+    DWORD exitCode;
+    std::wstring commandLine = L"/usr/bin/reflector @/etc/xdg/reflector/reflector.conf";
+    HRESULT hr = g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
+    if ((FAILED(hr)) || (exitCode != 0)) {
+        return false;
+    }
+
+    // https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_all_the_keys
+    commandLine = L"/usr/bin/pacman-key --init";
     hr = g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
     if ((FAILED(hr)) || (exitCode != 0)) {
+        return false;
+    }
 
-        // Delete the user if the group add command failed.
-        commandLine = L"/usr/sbin/userdel ";
-        commandLine += userName;
-        g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
+    commandLine = L"/usr/bin/pacman-key --populate archlinux";
+    hr = g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
+    if ((FAILED(hr)) || (exitCode != 0)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool DistributionInfo::GenerateDBusUuid()
+{
+    DWORD exitCode;
+    std::wstring commandLine = L"/usr/bin/dbus-uuidgen --ensure=/etc/machine-id";
+    HRESULT hr = g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
+    if ((FAILED(hr)) || (exitCode != 0)) {
         return false;
     }
 
@@ -55,7 +89,7 @@ ULONG DistributionInfo::QueryUid(std::wstring_view userName)
 
             CloseHandle(child);
             if (SUCCEEDED(hr)) {
-                char buffer[64];
+                char buffer[64]{};
                 DWORD bytesRead;
 
                 // Read the output of the command from the pipe and convert to a UID.

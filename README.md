@@ -69,6 +69,8 @@ It is possible to install and run the [Sway](https://swaywm.org/) tiling [Waylan
 
 WSLg creates a soft link to the Unix-domain socket `/tmp/.X11-unix` used by [Xorg](https://www.x.org/) for [local network connections](https://www.x.org/archive/X11R6.8.0/doc/Xorg.1.html#sect4). This breaks `wlroots` at <https://gitlab.freedesktop.org/wlroots/wlroots/-/blob/0.15.1/xwayland/sockets.c#L94-97>.
 
+### Sway installation
+
 The script [`2-sway.sh`](./scripts/2-sway.sh) installs Sway with the required dependencies and applies a [patch](./scripts/2-wsl-wlroots.sh) to the `wlroots` library to fix that issue with WSLg. It also configures Sway to run in headless mode with a slightly modified version of the [default configuration file](https://github.com/swaywm/sway/blob/v1.7/config.in):
 
 - Set _ALT_ as the modifier key
@@ -89,11 +91,22 @@ The installation process creates the script `~/.local/bin/s` to launch Sway with
 
 Audio support is provided by [PipeWire](https://pipewire.org/) and the [WSLg PulseAudio plugin](https://github.com/microsoft/wslg#pulse-audio-plugin).
 
+### dmenu
+
+WSL appends the Windows' `PATH` to your distro's one. If the `PATH` is too large, it may take a long time to open the default application launcher [`dmenu`](https://tools.suckless.org/dmenu/) in Sway. A workaround is to [disable the `PATH` appending feature](https://docs.microsoft.com/windows/wsl/wsl-config#interop-settings) in your `/etc/wsl.conf` configuration file.
+
+```ini
+[interop]
+appendWindowsPath = false
+```
+
+If you need to keep the Windows PATH in WSL, you can patch `dmenu` to exclude the search for executables in the Windows directories. The script [`2-wsl-dmenu.sh`](./scripts/2-wsl-dmenu.sh) implements this workaround.
+
 ## Customize the image
 
-You can package your own custom image with the following steps. More details are available at <https://docs.microsoft.com/windows/wsl/use-custom-distro#import-the-tar-file-into-wsl>
+You can package your own custom image with the following steps. More details are available at <https://docs.microsoft.com/windows/wsl/use-custom-distro#import-the-tar-file-into-wsl>.
 
-1. Create a folder to store the distribution (for example, `C:\wslDistroStorage\ArchLinux`)
+1. Create a folder to store the distribution (for example, `C:\wslDistroStorage\ArchLinux`).
 1. Download one of the images available at <https://gitlab.archlinux.org/archlinux/archlinux-docker/-/releases>. Extract the `tar` file to any folder and run the following command to import it to WSL:
 
     ```powershell
@@ -144,7 +157,7 @@ Open the main solution `DistroLauncher.sln` with Visual Studio and generate a te
 Create a sub-folder with name `x64` in the root folder of this project and copy the customized `image.tar.gz` file to it.
 
 ```powershell
-PS C:\repos\WSL-DistroLauncher> tree /F
+PS C:\repos\archlinux-wsl> tree /F
 Folder PATH listing
 C:.
 │   .gitignore

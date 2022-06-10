@@ -67,7 +67,7 @@ Besides creating the default user, the installation process also initializes the
 
 It is possible to install and run the [Sway](https://swaywm.org/) tiling [Wayland](https://wayland.freedesktop.org/) compositor in your WSL environment, but we need to apply a small patch to the [wlroots library](https://gitlab.freedesktop.org/wlroots/wlroots/) to fix an incompatibility with [WSLg](https://github.com/microsoft/wslg).
 
-WSLg creates a soft link to the Unix-domain socket `/tmp/.X11-unix` used by [Xorg](https://www.x.org/) for [local network connections](https://www.x.org/archive/X11R6.8.0/doc/Xorg.1.html#sect4). This breaks `wlroots` at <https://gitlab.freedesktop.org/wlroots/wlroots/-/blob/0.15.1/xwayland/sockets.c#L94-97>.
+WSLg creates a Unix-domain socket `/tmp/.X11-unix` used by [Xorg](https://www.x.org/) for [local network connections](https://www.x.org/archive/X11R6.8.0/doc/Xorg.1.html#sect4) without the [sticky bit](https://www.gnu.org/software/libc/manual/html_node/Permission-Bits.html#index-S_005fISVTX). This breaks `wlroots` at <https://gitlab.freedesktop.org/wlroots/wlroots/-/blob/0.15.1/xwayland/sockets.c#L102-109>.
 
 ### Sway installation
 
@@ -83,7 +83,7 @@ To execute the Sway installation script, open a PowerShell session in your Windo
 wsl -d ArchLinuxUnofficial -e bash -- ./2-sway.sh
 ```
 
-It is possible to run Sway with WSLg (unset the `WLR_BACKENDS` environment variable if you want to try), but in my case it spawns a window without title bar and I couldn't move it.
+It is possible to run Sway with WSLg (just execute `sway` if you want to try), but in my case it spawns a window without title bar and I couldn't move it.
 
 To improve the experience, the script installs _wayvnc_ to provide VNC access to Sway. To keep the configuration required to access the VNC server simple, _wayvnc_ is configured to accept unauthenticated connections from any interface. This shouldn't be an issue because WSL2 distros by default can't be accessed from your LAN. But if you [enable access from your LAN to the VNC port of your Arch Linux distro](https://docs.microsoft.com/windows/wsl/networking#accessing-a-wsl-2-distribution-from-your-local-area-network-lan), you will need to implement some kind of [user authentication and encryption to protect your VNC session](https://github.com/any1/wayvnc#running).
 
@@ -117,16 +117,16 @@ You can package your own custom image with the following steps. More details are
 1. Make any customization you want to your distro.
 1. When you are done with the customization, logout from `WSL` and run the following commands to export the image. You can install [7-zip](https://7-zip.org/) by running `winget install -e --id 7zip.7zip`.
 
-```powershell
-wsl --terminate ArchLinux
-wsl --export ArchLinux .\install.tar
-& "$env:ProgramFiles\7-Zip\7z.exe" a .\install.tar.gz .\install.tar
+    ```powershell
+    wsl --terminate ArchLinux
+    wsl --export ArchLinux .\install.tar
+    & "$env:ProgramFiles\7-Zip\7z.exe" a .\install.tar.gz .\install.tar
+    
+    # Optionally remove this distro
+    # wsl --unregister ArchLinux
+    ```
 
-# Optionally remove this distro
-# wsl --unregister ArchLinux
-```
-
-## Setup the development environment
+## Set up the development environment
 
 If you don't have Visual Studio, you can download the free Community edition with `winget`:
 

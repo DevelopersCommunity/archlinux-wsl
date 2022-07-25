@@ -5,6 +5,7 @@
 set -o errexit -o nounset
 
 pacman=$(cat /etc/pacman.conf)
+pacman="${pacman/NoProgressBar/\#NoProgressBar}"
 echo "${pacman%$'\[options\]\nNoExtract*'}" > /etc/pacman.conf
 
 pacman -Syu --noconfirm

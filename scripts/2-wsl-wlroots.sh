@@ -20,7 +20,7 @@ cat << END > PKGBUILD
 
 pkgname=wlroots
 pkgver=0.15.1
-pkgrel=5
+pkgrel=6
 license=('MIT')
 pkgdesc='Modular Wayland compositor library'
 url='https://gitlab.freedesktop.org/wlroots/wlroots'

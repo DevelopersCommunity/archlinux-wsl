@@ -9,14 +9,14 @@ bool DistributionInfo::CreateUser(std::wstring_view userName)
 {
     // Create the user account.
     DWORD exitCode;
-    std::wstring commandLine = L"/usr/sbin/useradd -m -U -G wheel ";
+    std::wstring commandLine = L"/bin/useradd -m -U -G wheel ";
     commandLine += userName;
     HRESULT hr = g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
     if ((FAILED(hr)) || (exitCode != 0)) {
         return false;
     }
 
-    commandLine = L"/usr/sbin/passwd ";
+    commandLine = L"/bin/passwd ";
     commandLine += userName;
     const wchar_t* passwd = commandLine.c_str();
     do
@@ -31,20 +31,26 @@ bool DistributionInfo::InitializePacman()
 {
     // https://wiki.archlinux.org/title/Reflector
     DWORD exitCode;
-    std::wstring commandLine = L"/usr/bin/reflector @/etc/xdg/reflector/reflector.conf";
+    std::wstring commandLine = L"/bin/systemctl enable --now reflector.timer";
     HRESULT hr = g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
     if ((FAILED(hr)) || (exitCode != 0)) {
         return false;
     }
 
     // https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_all_the_keys
-    commandLine = L"/usr/bin/pacman-key --init";
+    commandLine = L"/bin/pacman-key --init";
     hr = g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
     if ((FAILED(hr)) || (exitCode != 0)) {
         return false;
     }
 
-    commandLine = L"/usr/bin/pacman-key --populate archlinux";
+    commandLine = L"/bin/pacman-key --populate archlinux";
+    hr = g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
+    if ((FAILED(hr)) || (exitCode != 0)) {
+        return false;
+    }
+
+    commandLine = L"/bin/pacman -Sy --noconfirm --needed archlinux-keyring";
     hr = g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
     if ((FAILED(hr)) || (exitCode != 0)) {
         return false;
@@ -56,7 +62,7 @@ bool DistributionInfo::InitializePacman()
 bool DistributionInfo::GenerateDBusUuid()
 {
     DWORD exitCode;
-    std::wstring commandLine = L"/usr/bin/dbus-uuidgen --ensure=/etc/machine-id";
+    std::wstring commandLine = L"/bin/dbus-uuidgen --ensure=/etc/machine-id";
     HRESULT hr = g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
     if ((FAILED(hr)) || (exitCode != 0)) {
         return false;
@@ -74,7 +80,7 @@ ULONG DistributionInfo::QueryUid(std::wstring_view userName)
     ULONG uid = UID_INVALID;
     if (CreatePipe(&readPipe, &writePipe, &sa, 0)) {
         // Query the UID of the supplied username.
-        std::wstring command = L"/usr/bin/id -u ";
+        std::wstring command = L"/bin/id -u ";
         command += userName;
         int returnValue = 0;
         HANDLE child;

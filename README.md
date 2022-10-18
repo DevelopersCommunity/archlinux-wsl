@@ -11,40 +11,10 @@ The image used by this installer is based on the Arch Linux docker base image av
 - `NoExtract` options removed from [/etc/pacman.conf](https://archlinux.org/pacman/pacman.conf.5.html).
 - [sudo](https://archlinux.org/packages/core/x86_64/sudo/) and [reflector](https://archlinux.org/packages/community/any/reflector/) packages installed
 - `wheel` group added to `sudoers`
+- [Generate locales](https://wiki.archlinux.org/title/locale#Generating_locales)
+- Enable [systemd](https://aka.ms/wslsystemd)
 
 The script used to make these changes is available in the [scripts](./scripts/1-arch.sh) directory.
-
-```bash
-#!/bin/bash
-#
-# Prepare Arch Linux WSL image.
-
-set -o errexit -o nounset
-
-pacman=$(cat /etc/pacman.conf)
-echo "${pacman%$'\[options\]\nNoExtract*'}" > /etc/pacman.conf
-
-pacman -Syu --noconfirm
-pacman -S --noconfirm sudo reflector
-
-visudo=$(mktemp -q)
-cat << END > "${visudo}"
-#!/bin/bash
-#
-# Add wheel group to sudoers.
-
-set -o errexit -o nounset
-
-echo "%wheel ALL=(ALL:ALL) ALL" > "\$2"
-END
-
-chmod +x "${visudo}"
-(EDITOR="${visudo}" bash -c "visudo -f /etc/sudoers.d/01_wheel")
-rm "${visudo}"
-
-pacman -Scc --noconfirm
-rm -rf /etc/pacman.d/gnupg/
-```
 
 ## Installation
 
@@ -60,47 +30,9 @@ Besides creating the default user, the installation process also initializes the
 
 ## Post-installation
 
-- [Configure pacman parallel downloads](https://wiki.archlinux.org/title/Pacman#Enabling_parallel_downloads)
+- [Enable pacman parallel downloads](https://wiki.archlinux.org/title/Pacman#Enabling_parallel_downloads)
 - [Install a text editor](https://wiki.archlinux.org/title/Category:Text_editors)
-
-## Sway window manager
-
-It is possible to install and run the [Sway](https://swaywm.org/) tiling [Wayland](https://wayland.freedesktop.org/) compositor in your WSL environment, but we need to apply a small patch to the [wlroots library](https://gitlab.freedesktop.org/wlroots/wlroots/) to fix an incompatibility with [WSLg](https://github.com/microsoft/wslg).
-
-WSLg creates a Unix-domain socket `/tmp/.X11-unix` used by [Xorg](https://www.x.org/) for [local network connections](https://www.x.org/archive/X11R6.8.0/doc/Xorg.1.html#sect4) without the [sticky bit](https://www.gnu.org/software/libc/manual/html_node/Permission-Bits.html#index-S_005fISVTX). This breaks `wlroots` at <https://gitlab.freedesktop.org/wlroots/wlroots/-/blob/0.15.1/xwayland/sockets.c#L102-109>.
-
-### Sway installation
-
-The script [`2-sway.sh`](./scripts/2-sway.sh) installs Sway with the required dependencies and applies a [patch](./scripts/2-wsl-wlroots.sh) to the `wlroots` library to fix that issue with WSLg. It also configures Sway to run in headless mode with a slightly modified version of the [default configuration file](https://github.com/swaywm/sway/blob/v1.7/config.in):
-
-- Set _ALT_ as the modifier key
-- Set the resolution for the _HEADLESS-1_ output to 1600x900
-- Launch [wayvnc](https://github.com/any1/wayvnc)
-
-To execute the Sway installation script, open a PowerShell session in your Windows host, go to the `scripts` folder, and execute the command:
-
-```powershell
-wsl -d ArchLinuxUnofficial -e bash -- ./2-sway.sh
-```
-
-It is possible to run Sway with WSLg (just execute `sway` if you want to try), but in my case it spawns a window without title bar and I couldn't move it.
-
-To improve the experience, the script installs _wayvnc_ to provide VNC access to Sway. To keep the configuration required to access the VNC server simple, _wayvnc_ is configured to accept unauthenticated connections from any interface. This shouldn't be an issue because WSL2 distros by default can't be accessed from your LAN. But if you [enable access from your LAN to the VNC port of your Arch Linux distro](https://docs.microsoft.com/windows/wsl/networking#accessing-a-wsl-2-distribution-from-your-local-area-network-lan), you will need to implement some kind of [user authentication and encryption to protect your VNC session](https://github.com/any1/wayvnc#running).
-
-The installation process creates the script `~/.local/bin/s` to launch Sway with a [D-Bus](https://www.freedesktop.org/wiki/Software/dbus/) session. Run this script and connect with a VNC client (for example, [TigerNVC](https://tigervnc.org/)) from your Windows host using the `localhost` address. Execute `winget install -e --id TigerVNCproject.TigerVNC` to install _TigerVNC Viewer_.
-
-Audio support is provided by [PipeWire](https://pipewire.org/) and the [WSLg PulseAudio plugin](https://github.com/microsoft/wslg#pulse-audio-plugin).
-
-### dmenu
-
-WSL appends the Windows' `PATH` to your distro's one. If the `PATH` is too large, it may take a long time to open the default application launcher [`dmenu`](https://tools.suckless.org/dmenu/) in Sway. A workaround is to [disable the `PATH` appending feature](https://docs.microsoft.com/windows/wsl/wsl-config#interop-settings) in your `/etc/wsl.conf` configuration file.
-
-```ini
-[interop]
-appendWindowsPath = false
-```
-
-If you need to keep the Windows PATH in WSL, you can patch `dmenu` to exclude the search for executables in the Windows directories. The script [`2-wsl-dmenu.sh`](./scripts/2-wsl-dmenu.sh) implements this workaround.
+- [Configure and enable Reflector timer](https://wiki.archlinux.org/title/reflector#Automation)
 
 ## Customize the image
 
@@ -195,7 +127,7 @@ openssl pkcs12 \
 
 After extracting the certificate, you can import it to a certificate store with the same command described in the [installation section](#installation).
 
-With the certificate installed, simply double click the `MSIX` file to start your custom distro installation process.
+With the certificate installed, simply double-click the `MSIX` file to start your custom distro installation process.
 
 ## Arch Linux trademark
 

@@ -26,5 +26,15 @@ chmod +x "${visudo}"
 (EDITOR="${visudo}" bash -c "visudo -f /etc/sudoers.d/01_wheel")
 rm "${visudo}"
 
+locale_gen=$(cat /etc/locale.gen)
+echo "${locale_gen/\#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8}" > /etc/locale.gen
+locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf
+
+cat << END > /etc/wsl.conf
+[boot]
+systemd=true
+END
+
 pacman -Scc --noconfirm
 rm -rf /etc/pacman.d/gnupg/

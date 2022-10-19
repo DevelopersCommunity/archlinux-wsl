@@ -32,7 +32,6 @@ Besides creating the default user, the installation process also initializes the
 
 - [Enable pacman parallel downloads](https://wiki.archlinux.org/title/Pacman#Enabling_parallel_downloads)
 - [Install a text editor](https://wiki.archlinux.org/title/Category:Text_editors)
-- [Configure and enable Reflector timer](https://wiki.archlinux.org/title/reflector#Automation)
 
 ## Customize the image
 

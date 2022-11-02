@@ -2,7 +2,7 @@
 #
 # Prepare Arch Linux WSL image.
 
-set -o errexit -o nounset
+set -eu
 
 pacman=$(cat /etc/pacman.conf)
 pacman="${pacman/NoProgressBar/\#NoProgressBar}"
@@ -17,7 +17,7 @@ cat << END > "${visudo}"
 #
 # Add wheel group to sudoers.
 
-set -o errexit -o nounset
+set -eu
 
 echo "%wheel ALL=(ALL:ALL) ALL" > "\$2"
 END

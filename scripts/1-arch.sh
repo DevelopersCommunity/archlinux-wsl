@@ -6,13 +6,13 @@ set -eu
 
 pacman=$(cat /etc/pacman.conf)
 pacman="${pacman/NoProgressBar/\#NoProgressBar}"
-echo "${pacman%$'\[options\]\nNoExtract*'}" > /etc/pacman.conf
+echo "${pacman%$'\[options\]\nNoExtract*'}" >/etc/pacman.conf
 
 pacman -Syu --noconfirm
 pacman -S --noconfirm sudo reflector
 
 visudo=$(mktemp -q)
-cat << END > "${visudo}"
+cat <<END >"${visudo}"
 #!/bin/bash
 #
 # Add wheel group to sudoers.
@@ -27,11 +27,11 @@ chmod +x "${visudo}"
 rm "${visudo}"
 
 locale_gen=$(cat /etc/locale.gen)
-echo "${locale_gen/\#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8}" > /etc/locale.gen
+echo "${locale_gen/\#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8}" >/etc/locale.gen
 locale-gen
-echo "LANG=en_US.UTF-8" > /etc/locale.conf
+echo "LANG=en_US.UTF-8" >/etc/locale.conf
 
-cat << END > /etc/wsl.conf
+cat <<END >/etc/wsl.conf
 [boot]
 systemd=true
 END

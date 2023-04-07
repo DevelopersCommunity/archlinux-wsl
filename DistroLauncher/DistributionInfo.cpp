@@ -50,7 +50,7 @@ bool DistributionInfo::InitializePacman()
         return false;
     }
 
-    commandLine = L"/bin/pacman -Sy --noconfirm --needed archlinux-keyring";
+    commandLine = L"/bin/pacman -S --noconfirm --needed archlinux-keyring";
     hr = g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
     if ((FAILED(hr)) || (exitCode != 0)) {
         return false;

@@ -1,0 +1,13 @@
+name: Release
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Arch Linux docker image tag'
+        required: true
+        type: string
+jobs:
+  build:
+    uses: .github/workflows/reusable-build.yml
+    with:
+      image_tag: ${{ inputs.image_tag }}

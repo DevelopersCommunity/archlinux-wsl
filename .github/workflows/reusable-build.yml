@@ -1,0 +1,55 @@
+name: Reusable Build
+on:
+  workflow_call:
+    inputs:
+      image_tag:
+        description: 'Arch Linux docker image tag'
+        required: true
+        type: string
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: WSL Image
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          cd scripts || exit
+          docker build -t archwsl --build-arg IMAGE_TAG=${IMAGE_TAG} .
+          docker run --name archwsl archwsl
+          docker export archwsl > ./install.tar
+          gzip ./install.tar
+      - uses: actions/upload-artifact@v3
+        with:
+          name: x64
+          path: ./install.tar.gz
+          if-no-files-found: error
+  build:
+    runs-on: windows-latest
+    needs: image
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+      - name: Configure
+        shell: bash
+        env:
+          PFX: ${{ secrets.PFX }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          shopt -s extglob
+          echo "${PFX}" | base64 -d > ./DistroLauncher-Appx/DistroLauncher-Appx_TemporaryKey.pfx
+          version=${IMAGE_TAG#base-+([[:digit:]]).+([[:digit:]]).}
+          sed -i -E "s/([[:space:]]Version=\")[[:digit:].]+\"/\11.${version:0: -4}.${version: -4}\"/" ./DistroLauncher-Appx/MyDistro.appxmanifest
+          openssl pkcs12 -in ./DistroLauncher-Appx/DistroLauncher-Appx_TemporaryKey.pfx -out ./DistroLauncher-Appx_TemporaryKey.crt -nokeys
+      - name: Build
+        run: |
+          .\build.bat rel
+          del .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx
+      - uses: actions/upload-artifact@v3
+        with:
+          name: build
+          path: |
+            ./DistroLauncher-Appx_TemporaryKey.crt
+            ./DistroLauncher-Appx/Upload/DistroLauncher-Appx_*/*.msixbundle
+          if-no-files-found: error

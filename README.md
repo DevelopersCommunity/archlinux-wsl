@@ -2,23 +2,42 @@
 
 ## Introduction
 
-This is an [Arch Linux](https://archlinux.org) installer/launcher for the [Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/windows/wsl/). This installer was built using the [WSL Distro Launcher Reference Implementation](https://github.com/microsoft/WSL-DistroLauncher).
+This is an [Arch Linux](https://archlinux.org) installer/launcher for the
+[Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/windows/wsl/).
+This installer was built using the [WSL Distro Launcher Reference
+Implementation](https://github.com/microsoft/WSL-DistroLauncher).
 
 ## Image
 
-The image used by this installer is based on the Arch Linux docker base image available in the [Arch Linux docker repository](https://gitlab.archlinux.org/archlinux/archlinux-docker/-/releases) with the following changes:
+The image used by this installer is based on the Arch Linux docker base image
+available in the [Arch Linux docker
+repository](https://gitlab.archlinux.org/archlinux/archlinux-docker/-/releases)
+with the following changes:
 
-- `NoExtract` options removed from [/etc/pacman.conf](https://archlinux.org/pacman/pacman.conf.5.html).
-- [sudo](https://archlinux.org/packages/core/x86_64/sudo/) and [reflector](https://archlinux.org/packages/community/any/reflector/) packages installed
+- `NoExtract` options removed from
+[/etc/pacman.conf](https://archlinux.org/pacman/pacman.conf.5.html).
+- [sudo](https://archlinux.org/packages/core/x86_64/sudo/) and
+[reflector](https://archlinux.org/packages/extra/any/reflector/) packages
+installed
 - `wheel` group added to `sudoers`
 - [Generate locales](https://wiki.archlinux.org/title/locale#Generating_locales)
 - Enable [systemd](https://aka.ms/wslsystemd)
 
-The script used to make these changes is available in the [scripts](./scripts/1-arch.sh) directory.
+The script used to make these changes is available in the
+[scripts](./scripts/1-arch.sh) directory.
 
 ## Installation
 
-The Arch Linux installer is packaged with the [MSIX format](https://docs.microsoft.com/windows/msix/), and is available in the [releases page](https://github.com/DevelopersCommunity/WSL-DistroLauncher/releases) The package was signed with a self-signed certificate, you need to import it into one of your local machine certificate trusted store (for example, `Trusted People`) before executing the installer. Run the following PowerShell command to import it (you will need administrative privileges). The certificate is available in the [scripts](./scripts/DistroLauncher-Appx_TemporaryKey.crt) directory. After installing the package, you can remove it from your store.
+The Arch Linux installer is packaged with the [MSIX
+format](https://docs.microsoft.com/windows/msix/), and is available in the
+[releases
+page](https://github.com/DevelopersCommunity/WSL-DistroLauncher/releases) The
+package was signed with a self-signed certificate, you need to import it into
+one of your local machine certificate trusted store (for example, `Trusted
+People`) before executing the installer. Run the following PowerShell command to
+import it (you will need administrative privileges). The certificate is
+available in the [scripts](./scripts/DistroLauncher-Appx_TemporaryKey.crt)
+directory. After installing the package, you can remove it from your store.
 
 ```powershell
 Import-Certificate `
@@ -26,27 +45,41 @@ Import-Certificate `
     -CertStoreLocation cert:\LocalMachine\TrustedPeople
 ```
 
-Besides creating the default user, the installation process also initializes the pacman [mirror list](https://wiki.archlinux.org/title/mirrors) and the [keyring](https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_all_the_keys).
+Besides creating the default user, the installation process also initializes the
+pacman [mirror list](https://wiki.archlinux.org/title/mirrors) and the
+[keyring](https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_all_the_keys).
 
 ## Post-installation
 
-- [Enable pacman parallel downloads](https://wiki.archlinux.org/title/Pacman#Enabling_parallel_downloads)
-- [Install a text editor](https://wiki.archlinux.org/title/Category:Text_editors)
+- [Enable pacman parallel
+downloads](https://wiki.archlinux.org/title/Pacman#Enabling_parallel_downloads)
+- [Install a text
+editor](https://wiki.archlinux.org/title/Category:Text_editors)
 
 ## Customize the image
 
-You can package your own custom image with the following steps. More details are available at <https://docs.microsoft.com/windows/wsl/use-custom-distro#import-the-tar-file-into-wsl>.
+You can package your own custom image with the following steps. More details are
+available at
+<https://docs.microsoft.com/windows/wsl/use-custom-distro#import-the-tar-file-into-wsl>.
 
-1. Create a folder to store the distribution (for example, `C:\wslDistroStorage\ArchLinux`).
-1. Download one of the images available at <https://gitlab.archlinux.org/archlinux/archlinux-docker/-/releases>. Extract the `tar` file to any folder and run the following command to import it to WSL:
+1. Create a folder to store the distribution (for example,
+`C:\wslDistroStorage\ArchLinux`).
+1. Download one of the images available at
+<https://gitlab.archlinux.org/archlinux/archlinux-docker/-/releases>. Extract
+the `tar` file to any folder and run the following command to import it to WSL:
 
     ```powershell
-    wsl --import ArchLinux C:\wslDistroStorage\ArchLinux .\base-XXXXXXXX.X.XXXXX.tar
+    wsl --import ArchLinux `
+        C:\wslDistroStorage\ArchLinux `
+        .\base-XXXXXXXX.X.XXXXX.tar
     ```
 
-1. Use the command `wsl -d ArchLinux` to run the newly imported Arch Linux distribution.
+1. Use the command `wsl -d ArchLinux` to run the newly imported Arch Linux
+distribution.
 1. Make any customization you want to your distro.
-1. When you are done with the customization, logout from `WSL` and run the following commands to export the image. You can install [7-zip](https://7-zip.org/) by running `winget install -e --id 7zip.7zip`.
+1. When you are done with the customization, logout from `WSL` and run the
+following commands to export the image. You can install
+[7-zip](https://7-zip.org/) by running `winget install -e --id 7zip.7zip`.
 
     ```powershell
     wsl --terminate ArchLinux
@@ -59,7 +92,8 @@ You can package your own custom image with the following steps. More details are
 
 ## Set up the development environment
 
-If you don't have Visual Studio, you can download the free Community edition with `winget`:
+If you don't have Visual Studio, you can download the free Community edition
+with `winget`:
 
 ```powershell
 winget install -e --id Microsoft.VisualStudio.2022.Community
@@ -76,7 +110,8 @@ winget install -e --id Microsoft.VisualStudio.2022.Community
     --passive
 ```
 
-Open the main solution `DistroLauncher.sln` with Visual Studio and generate a test certificate:
+Open the main solution `DistroLauncher.sln` with Visual Studio and generate a
+test certificate:
 
 1. In Visual Studio, open `DistroLauncher-Appx/MyDistro.appxmanifest`
 1. Select the Packaging tab
@@ -85,7 +120,8 @@ Open the main solution `DistroLauncher.sln` with Visual Studio and generate a te
 
 ## Building the project
 
-Create a sub-folder with name `x64` in the root folder of this project and copy the customized `image.tar.gz` file to it.
+Create a sub-folder with name `x64` in the root folder of this project and copy
+the customized `image.tar.gz` file to it.
 
 ```powershell
 PS C:\repos\archlinux-wsl> tree /F
@@ -111,11 +147,16 @@ C:.
     │   ...
 ```
 
-Use the Windows Start menu to open the "Developer Command Prompt for Visual Studio", go to the root folder of this project and run `.\build.bat rel`.
+Use the Windows Start menu to open the "Developer Command Prompt for Visual
+Studio", go to the root folder of this project and run `.\build.bat rel`.
 
-Once you've completed the build, the packaged `MSIX` should be placed in the folder `x64\Release\DistroLauncher-Appx` and should be named something like `DistroLauncher-Appx_1.1.XXXXX.0_x64.msix`.
+Once you've completed the build, the packaged `MSIX` should be placed in the
+folder `x64\Release\DistroLauncher-Appx` and should be named something like
+`DistroLauncher-Appx_1.1.XXXXX.0_x64.msix`.
 
-Before using the package, you need to import the certificate used to sign it. You can extract the certificate with _Git Bash_ and [OpenSSL](https://www.openssl.org/):
+Before using the package, you need to import the certificate used to sign it.
+You can extract the certificate with _Git Bash_ and
+[OpenSSL](https://www.openssl.org/):
 
 ```bash
 openssl pkcs12 \
@@ -124,10 +165,16 @@ openssl pkcs12 \
     -nokeys
 ```
 
-After extracting the certificate, you can import it to a certificate store with the same command described in the [installation section](#installation).
+After extracting the certificate, you can import it to a certificate store with
+the same command described in the [installation section](#installation).
 
-With the certificate installed, simply double-click the `MSIX` file to start your custom distro installation process.
+With the certificate installed, simply double-click the `MSIX` file to start
+your custom distro installation process.
 
 ## Arch Linux trademark
 
-The logos used in this launcher were taken from the [Arch Linux logos and artwork page](https://archlinux.org/art/), and I believe their usage in this project fits the [permitted use](https://wiki.archlinux.org/title/DeveloperWiki:TrademarkPolicy#Permitted_Use) condition from their trademark policy.
+The logos used in this launcher were taken from the [Arch Linux logos and
+artwork page](https://archlinux.org/art/), and I believe their usage in this
+project fits the [permitted
+use](https://wiki.archlinux.org/title/DeveloperWiki:TrademarkPolicy#Permitted_Use)
+condition from their trademark policy.

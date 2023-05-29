@@ -1,0 +1,88 @@
+name: Reusable package
+on:
+  workflow_call:
+    secrets:
+      DOCKER_HUB_USERNAME:
+        required: true
+      DOCKER_HUB_PAT:
+        required: true
+      PFX_BASE64:
+        required: true
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Build image
+        run: |
+          docker build -t archwsl .
+          docker run --name archwsl -t archwsl ls
+          docker export archwsl > install.tar
+          gzip install.tar
+      - name: Upload image
+        uses: actions/upload-artifact@v3
+        with:
+          name: image
+          path: install.tar.gz
+          if-no-files-found: error
+  build:
+    needs: image
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+      - name: Create image directory
+        shell: pwsh
+        run: |
+          New-Item -Path . -Name x64 -ItemType Directory
+          Copy-Item -Path image\install.tar.gz -Destination x64
+      - name: Update version
+        shell: pwsh
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_PAT: ${{ secrets.DOCKER_HUB_PAT }}
+        run: |
+          $request = "{ ""username"": ""$env:DOCKER_HUB_USERNAME"", ""password"": ""$env:DOCKER_HUB_PAT"" }"
+          $token = (Invoke-RestMethod -Uri https://hub.docker.com/v2/users/login -Method Post -Headers @{ "Content-Type" = "application/json" } -Body $request).token
+          $images = (Invoke-RestMethod -Uri 'https://hub.docker.com/v2/namespaces/library/repositories/archlinux/images?ordering=-last_activity&page=1' -Method Get -Headers @{ "Authorization" = "Bearer $token" })
+          $tags = $null
+          $images.results | ForEach-Object {
+            $item = $_.tags
+            $_.tags | ForEach-Object {
+              if ($tags -eq $null -and $_.tag -eq "latest" -and $_.is_current -eq "True") {
+                  $tags = $item
+              }
+            }
+          }
+          $imagebuild = ($tags | Where-Object { $_.tag -like "base-*" }).tag.split(".")[-1]
+          $version = "1." + [System.Text.Encoding]::UTF8.GetString($imagebuild[0..($imagebuild.Length - 5)]) + "." + [System.Text.Encoding]::UTF8.GetString($imagebuild[-4..-1])
+          $manifest = (Get-Content -Path .\DistroLauncher-Appx\MyDistro.appxmanifest)
+          $manifest = $manifest -creplace '(\bVersion=)"[\d.]+"', ('$1"' + $version + '.0"')
+          $manifest > .\DistroLauncher-Appx\MyDistro.appxmanifest
+      - name: Update thumbprint
+        shell: pwsh
+        env:
+          PFX_BASE64: ${{ secrets.PFX_BASE64 }}
+        run: |
+          $pfx = [System.Convert]::FromBase64String($env:PFX_BASE64)
+          Set-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -Value $pfx -AsByteStream
+          $thumbprint = (Get-PfxCertificate -FilePath .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -NoPromptForPassword).Thumbprint
+          $vcxproj = (Get-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj)
+          $vcxproj = $vcxproj -creplace '(<PackageCertificateThumbprint>).*(</PackageCertificateThumbprint>)', ('$1' + $thumbprint + '$2')
+          $vcxproj > .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
+      - name: Build
+        shell: pwsh
+        run: .\build.bat rel
+      - name: Upload package
+        uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: x64\Release\DistroLauncher-Appx\Upload\DistroLauncher-Appx_*\DistroLauncher-Appx_*_x64.msixbundle
+          if-no-files-found: error

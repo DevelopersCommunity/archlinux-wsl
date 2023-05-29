@@ -22,7 +22,7 @@ jobs:
   #         path: install.tar.gz
   #         if-no-files-found: error
   build:
-    needs: image
+    # needs: image
     runs-on: windows-latest
     steps:
       - name: Checkout

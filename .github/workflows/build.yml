@@ -55,6 +55,7 @@ jobs:
           DOCKER_HUB_PAT: ${{ secrets.DOCKER_HUB_PAT }}
         run: |
           $json = (curl -X POST -H 'Content-Type: application/json' -d "{`"username`": `"$env:DOCKER_HUB_USERNAME`",`"password`": `"$env:DOCKER_HUB_PAT`"}" https://hub.docker.com/v2/users/login)
+          $json
           $token = (ConvertFrom-Json -InputObject $json).token
           $imagesjson = (curl -X GET -H "Authorization: Bearer $token" 'https://hub.docker.com/v2/namespaces/archlinux/repositories/archlinux/images?ordering=-last_activity')
           $images = ConvertFrom-Json -InputObject $imagesjson

@@ -57,7 +57,7 @@ jobs:
           curl --version
           $request = "{ ""username"": ""$env:DOCKER_HUB_USERNAME"", ""password"": ""$env:DOCKER_HUB_PAT"" }"
           $request
-          $json = (curl -X POST -H "Content-Type: application/json" -d "$request" "https://hub.docker.com/v2/users/login")
+          $json = (curl -H "Content-Type: application/json" -d "$request" -v "https://hub.docker.com/v2/users/login")
           $json
           $token = (ConvertFrom-Json -InputObject $json).token
           $imagesjson = (curl -X GET -H "Authorization: Bearer $token" "https://hub.docker.com/v2/namespaces/archlinux/repositories/archlinux/images?ordering=-last_activity")

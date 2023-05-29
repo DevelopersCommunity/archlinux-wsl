@@ -36,16 +36,13 @@ jobs:
         run: |
           New-Item -Path . -Name x64 -ItemType Directory
           Copy-Item -Path image\install.tar.gz -Destination x64
-      - name: Copy certificate
+      - name: Update thumbprint
         shell: pwsh
         env:
           PFX: ${{ secrets.PFX }}
         run: |
-          $pfxbin = [System.Convert]::FromBase64String($env:PFX)
-          Set-Content -Path DistroLauncher-Appx/DistroLauncher-Appx_TemporaryKey.pfx -Value $pfxbin -AsByteStream
-      - name: Update thumbprint
-        shell: pwsh
-        run: |
+          $pfx = [System.Convert]::FromBase64String($env:PFX)
+          Set-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -Value $pfx -AsByteStream
           $thumbprint = (Get-PfxCertificate -FilePath .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx).Thumbprint
           (Get-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj) -creplace '(<PackageCertificateThumbprint>).*(</PackageCertificateThumbprint>)', ('$1' + $thumbprint + '$2') > .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
       - name: Update version

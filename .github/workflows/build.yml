@@ -13,13 +13,13 @@ jobs:
         run: |
           docker build -t archwsl .
           docker run --name archwsl -t archwsl ls
-          docker export archwsl > image.tar
-          gzip image.tar
+          docker export archwsl > install.tar
+          gzip install.tar
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: image
-          path: image.tar.gz
+          path: install.tar.gz
           if-no-files-found: error
   build:
     needs: image
@@ -35,7 +35,7 @@ jobs:
         shell: pwsh
         run: |
           New-Item -Path . -Name x64 -ItemType Directory
-          Copy-Item -Path image\image.tar.gz -Destination x64
+          Copy-Item -Path image\install.tar.gz -Destination x64
       - name: Copy certificate
         shell: pwsh
         env:

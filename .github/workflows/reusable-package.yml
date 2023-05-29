@@ -43,6 +43,7 @@ jobs:
         run: |
           $pfx = [System.Convert]::FromBase64String($env:PFX)
           Set-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -Value $pfx -AsByteStream
+          Get-Item -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx
           $thumbprint = (Get-PfxCertificate -FilePath .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -NoPromptForPassword).Thumbprint
           (Get-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj) -creplace '(<PackageCertificateThumbprint>).*(</PackageCertificateThumbprint>)', ('$1' + $thumbprint + '$2') > .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
       - name: Update version
@@ -51,7 +52,6 @@ jobs:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_PAT: ${{ secrets.DOCKER_HUB_PAT }}
         run: |
-          curl --version
           $request = "{ ""username"": ""$env:DOCKER_HUB_USERNAME"", ""password"": ""$env:DOCKER_HUB_PAT"" }"
           $token = (Invoke-RestMethod -Uri https://hub.docker.com/v2/users/login -Method Post -Headers @{ 'Content-Type' = 'application/json' } -Body $request).token
           $images = Invoke-RestMethod -Uri https://hub.docker.com/v2/namespaces/archlinux/repositories/archlinux/images?ordering=-last_activity -Method Get -Headers @{ "Authorization" = "Bearer $token" }

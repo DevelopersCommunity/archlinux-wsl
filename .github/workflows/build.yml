@@ -1,0 +1,48 @@
+name: Build
+on:
+  workflow_dispatch:
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Build image
+        run: |
+          docker build -t archwsl .
+          docker run --name archwsl -t archwsl ls
+          docker export archwsl > image.tar
+          gzip image.tar
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: image
+          path: image.tar.gz
+          if-no-files-found: error
+  build:
+    needs: image
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+      - name: Create image directory
+        shell: pwsh
+        run: |
+          New-Item -Path . -Name x64 -ItemType Directory
+          Copy-Item -Path image\image.tar.gz -Destination x64
+      - name: Copy certificate
+        shell: pwsh
+        env:
+          PFX: ${{ secrets.PFX }}
+        run: |
+          $pfxbin=[System.Convert]::FromBase64String($env:PFX)
+          Set-Content -Path DistroLauncher-Appx/DistroLauncher-Appx_TemporaryKey.pfx -Value $pfxbin -AsByteStream
+      - name: Build
+        shell: pwsh
+        run: .\build.bat rel

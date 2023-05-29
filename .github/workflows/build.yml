@@ -57,6 +57,7 @@ jobs:
           curl --version
           $request = "{ ""username"": ""$env:DOCKER_HUB_USERNAME"", ""password"": ""$env:DOCKER_HUB_PAT"" }"
           $request
+          $request.Length
           $json = (curl -H "Content-Type: application/json" -d "$request" -v "https://hub.docker.com/v2/users/login")
           $json
           $token = (ConvertFrom-Json -InputObject $json).token

@@ -15,7 +15,7 @@ jobs:
           docker run --name archwsl -t archwsl ls
           docker export archwsl > install.tar
           gzip install.tar
-      - name: Upload artifact
+      - name: Upload image
         uses: actions/upload-artifact@v3
         with:
           name: image
@@ -46,3 +46,9 @@ jobs:
       - name: Build
         shell: pwsh
         run: .\build.bat rel
+      - name: Upload package
+        uses: actions/upload-artifact@v3
+        with:
+          name: package
+          path: x64\Release\DistroLauncher-Appx\Upload\DistroLauncher-Appx_*\DistroLauncher-Appx_*_x64.msixbundle
+          if-no-files-found: error

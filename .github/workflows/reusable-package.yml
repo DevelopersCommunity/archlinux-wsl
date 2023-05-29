@@ -41,9 +41,7 @@ jobs:
         env:
           PFX: ${{ secrets.PFX }}
         run: |
-          $pfx = [System.Convert]::FromBase64String($env:PFX)
-          $env:PFX.Length
-          $pfx.Length
+          $pfx = [System.Convert]::FromBase64String("$env:PFX")
           Set-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -Value $pfx -AsByteStream
           Get-Item -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx
           $thumbprint = (Get-PfxCertificate -FilePath .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -NoPromptForPassword).Thumbprint

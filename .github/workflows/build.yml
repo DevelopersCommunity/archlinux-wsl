@@ -41,8 +41,28 @@ jobs:
         env:
           PFX: ${{ secrets.PFX }}
         run: |
-          $pfxbin=[System.Convert]::FromBase64String($env:PFX)
+          $pfxbin = [System.Convert]::FromBase64String($env:PFX)
           Set-Content -Path DistroLauncher-Appx/DistroLauncher-Appx_TemporaryKey.pfx -Value $pfxbin -AsByteStream
+      - name: Update thumbprint
+        shell: pwsh
+        run: |
+          $thumbprint = (Get-PfxCertificate -FilePath .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx).Thumbprint
+          (Get-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj) -creplace '(<PackageCertificateThumbprint>).*(</PackageCertificateThumbprint>)', ('$1' + $thumbprint + '$2') > .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
+      - name: Update version
+        shell: pwsh
+        env:
+          DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+          DOCKER_HUB_PAT: ${{ secrets.DOCKER_HUB_PAT }}
+        run: |
+          $json = (curl -X POST -H 'Content-Type: application/json' -d "{`"username`": `"$DOCKER_HUB_USERNAME`",`"password`": `"$DOCKER_HUB_PAT`"}" https://hub.docker.com/v2/users/login)
+          $token = (ConvertFrom-Json -InputObject $json).token
+          $imagesjson = (curl -X GET -H "Authorization: Bearer $token" 'https://hub.docker.com/v2/namespaces/archlinux/repositories/archlinux/images?ordering=-last_activity')
+          $images = ConvertFrom-Json -InputObject $imagesjson
+          Remove-Variable -Name tags
+          $images.results | ForEach-Object { $item = $_; $_.tags | ForEach-Object { if ($_.tag -eq 'latest' -and $_.is_current -eq 'True') { $tags = $item; break } }; if (Test-Path variable:tags) { break } }
+          $imagebuild = ($tags | Where-Object { $_.tag -like 'base-*' }).tag.split('.')[-1]
+          $version = '1.' + [System.Text.Encoding]::UTF8.GetString($imagebuild[0..($imagebuild.Length - 5)]) + '.' + [System.Text.Encoding]::UTF8.GetString($imagebuild[-4..-1])
+          (Get-Content -Path .\DistroLauncher-Appx\MyDistro.appxmanifest) -creplace '(\bVersion=)"[\d.]+"', ('$1"' + $version + '"') > .\DistroLauncher-Appx\MyDistro.appxmanifest
       - name: Build
         shell: pwsh
         run: .\build.bat rel

@@ -45,6 +45,7 @@ jobs:
           Set-Content -Path DistroLauncher-Appx/DistroLauncher-Appx_TemporaryKey.pfx -Value $pfxbin -AsByteStream
       - name: Build
         shell: pwsh
+<<<<<<< HEAD
         run: .\build.bat rel
       - name: Upload package
         uses: actions/upload-artifact@v3
@@ -52,3 +53,6 @@ jobs:
           name: package
           path: x64\Release\DistroLauncher-Appx\Upload\DistroLauncher-Appx_*\DistroLauncher-Appx_*_x64.msixbundle
           if-no-files-found: error
+=======
+        run: .\build.bat rel
+>>>>>>> afa0ef3924e0f50e103d246a04cf0031450b4ff1

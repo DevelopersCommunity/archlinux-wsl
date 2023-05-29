@@ -43,7 +43,7 @@ jobs:
         run: |
           $pfx = [System.Convert]::FromBase64String($env:PFX)
           Set-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -Value $pfx -AsByteStream
-          $thumbprint = (Get-PfxCertificate -FilePath .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx).Thumbprint
+          $thumbprint = (Get-PfxCertificate -FilePath .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -NoPromptForPassword).Thumbprint
           (Get-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj) -creplace '(<PackageCertificateThumbprint>).*(</PackageCertificateThumbprint>)', ('$1' + $thumbprint + '$2') > .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
       - name: Update version
         shell: pwsh

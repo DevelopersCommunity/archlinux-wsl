@@ -39,9 +39,11 @@ jobs:
       - name: Update thumbprint
         shell: pwsh
         env:
-          PFX: ${{ secrets.PFX }}
+          PFX_BASE64: ${{ secrets.PFX_BASE64 }}
         run: |
-          $pfx = [System.Convert]::FromBase64String("$env:PFX")
+          $env:PFX_BASE64.Length
+          $pfx = [System.Convert]::FromBase64String($env:PFX_BASE64)
+          $pfx.Length
           Set-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -Value $pfx -AsByteStream
           Get-Item -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx
           $thumbprint = (Get-PfxCertificate -FilePath .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -NoPromptForPassword).Thumbprint

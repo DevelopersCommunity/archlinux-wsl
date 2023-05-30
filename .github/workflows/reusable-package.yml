@@ -63,9 +63,7 @@ jobs:
             }
           }
           $imagebuild = ($tags | Where-Object { $_.tag -like "base-*" }).tag.split(".")[-1]
-          $imagebuild.Count
           $version = "1." + [System.Text.Encoding]::UTF8.GetString($imagebuild[0..($imagebuild.Length - 5)]) + "." + [System.Text.Encoding]::UTF8.GetString($imagebuild[-4..-1])
-          $version
           $manifest = (Get-Content -Path .\DistroLauncher-Appx\MyDistro.appxmanifest)
           $manifest = $manifest -creplace '(\bVersion=)"[\d.]+"', ('$1"' + $version + '"')
           $manifest > .\DistroLauncher-Appx\MyDistro.appxmanifest

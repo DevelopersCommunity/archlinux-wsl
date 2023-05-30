@@ -58,7 +58,7 @@ jobs:
           $images.results
           $tags = $null
           $images.results | ForEach-Object {
-            $item = $_
+            $item = $_.tags
             Write-Output 'Checking tags:'
             $_.tags
             $_.tags | ForEach-Object {

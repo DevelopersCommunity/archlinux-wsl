@@ -6,3 +6,4 @@ on:
 jobs:
   package:
     uses: ./.github/workflows/reusable-package.yml
+    secrets: inherit

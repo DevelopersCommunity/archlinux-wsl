@@ -1,6 +1,13 @@
 name: Reusable package
 on:
   workflow_call:
+    secrets:
+      DOCKER_HUB_USERNAME:
+        required: true
+      DOCKER_HUB_PAT:
+        required: true
+      PFX_BASE64:
+        required: true
 jobs:
   image:
     runs-on: ubuntu-latest

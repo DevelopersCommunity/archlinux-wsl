@@ -9,27 +9,27 @@ on:
       PFX_BASE64:
         required: true
 jobs:
-  image:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Build image
-        run: |
-          docker build -t archwsl .
-          docker run --name archwsl -t archwsl ls
-          docker export archwsl > install.tar
-          gzip install.tar
-      - name: Upload image
-        uses: actions/upload-artifact@v3
-        with:
-          name: image
-          path: install.tar.gz
-          if-no-files-found: error
+  # image:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Build image
+  #       run: |
+  #         docker build -t archwsl .
+  #         docker run --name archwsl -t archwsl ls
+  #         docker export archwsl > install.tar
+  #         gzip install.tar
+  #     - name: Upload image
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: image
+  #         path: install.tar.gz
+  #         if-no-files-found: error
   build:
-    needs: image
+    # needs: image
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -56,7 +56,9 @@ jobs:
           $images = (Invoke-RestMethod -Uri https://hub.docker.com/v2/namespaces/archlinux/repositories/archlinux/images?ordering=-last_activity -Method Get -Headers @{ "Authorization" = "Bearer $token" })
           $images.results.Count
           $images.results | ForEach-Object { $item = $_; $_.tags | ForEach-Object { if ($_.tag -eq "latest" -and $_.is_current -eq "True") { $tags = $item; break } }; if (Test-Path variable:tags) { break } }
+          $tags.Count
           $imagebuild = ($tags | Where-Object { $_.tag -like "base-*" }).tag.split(".")[-1]
+          $imagebuild.Count
           $version = "1." + [System.Text.Encoding]::UTF8.GetString($imagebuild[0..($imagebuild.Length - 5)]) + "." + [System.Text.Encoding]::UTF8.GetString($imagebuild[-4..-1])
           $version
           $manifest = (Get-Content -Path .\DistroLauncher-Appx\MyDistro.appxmanifest)
@@ -73,12 +75,12 @@ jobs:
           $vcxproj = (Get-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj)
           $vcxproj = $vcxproj -creplace '(<PackageCertificateThumbprint>).*(</PackageCertificateThumbprint>)', ('$1' + $thumbprint + '$2')
           $vcxproj > .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
-      - name: Build
-        shell: pwsh
-        run: .\build.bat rel
-      - name: Upload package
-        uses: actions/upload-artifact@v3
-        with:
-          name: package
-          path: x64\Release\DistroLauncher-Appx\Upload\DistroLauncher-Appx_*\DistroLauncher-Appx_*_x64.msixbundle
-          if-no-files-found: error
+      # - name: Build
+      #   shell: pwsh
+      #   run: .\build.bat rel
+      # - name: Upload package
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: package
+      #     path: x64\Release\DistroLauncher-Appx\Upload\DistroLauncher-Appx_*\DistroLauncher-Appx_*_x64.msixbundle
+      #     if-no-files-found: error

@@ -55,7 +55,8 @@ jobs:
           $token.Length
           $images = (Invoke-RestMethod -Uri https://hub.docker.com/v2/namespaces/archlinux/repositories/archlinux/images?ordering=-last_activity -Method Get -Headers @{ "Authorization" = "Bearer $token" })
           $images.results.Count
-          $images.results | ForEach-Object { $item = $_; $_.tags | ForEach-Object { if ($_.tag -eq "latest" -and $_.is_current -eq "True") { $tags = $item; break } }; if (Test-Path variable:tags) { break } }
+          $tags = $null
+          $images.results | ForEach-Object { $item = $_; $_.tags | ForEach-Object { if ($_.tag -eq "latest" -and $_.is_current -eq "True") { $tags = $item; break } }; if ($tags -ne $null) { break } }
           $tags.Count
           $imagebuild = ($tags | Where-Object { $_.tag -like "base-*" }).tag.split(".")[-1]
           $imagebuild.Count

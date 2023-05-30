@@ -49,9 +49,12 @@ jobs:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
           DOCKER_HUB_PAT: ${{ secrets.DOCKER_HUB_PAT }}
         run: |
+          $env:DOCKER_HUB_USERNAME.Length
           $request = "{ ""username"": ""$env:DOCKER_HUB_USERNAME"", ""password"": ""$env:DOCKER_HUB_PAT"" }"
           $token = (Invoke-RestMethod -Uri https://hub.docker.com/v2/users/login -Method Post -Headers @{ 'Content-Type' = 'application/json' } -Body $request).token
+          $token
           $images = Invoke-RestMethod -Uri https://hub.docker.com/v2/namespaces/archlinux/repositories/archlinux/images?ordering=-last_activity -Method Get -Headers @{ "Authorization" = "Bearer $token" }
+          $images
           $images.results | ForEach-Object { $item = $_; $_.tags | ForEach-Object { if ($_.tag -eq "latest" -and $_.is_current -eq "True") { $tags = $item; break } }; if (Test-Path variable:tags) { break } }
           $imagebuild = ($tags | Where-Object { $_.tag -like "base-*" }).tag.split(".")[-1]
           $version = "1." + [System.Text.Encoding]::UTF8.GetString($imagebuild[0..($imagebuild.Length - 5)]) + "." + [System.Text.Encoding]::UTF8.GetString($imagebuild[-4..-1])
@@ -64,7 +67,6 @@ jobs:
         env:
           PFX_BASE64: ${{ secrets.PFX_BASE64 }}
         run: |
-          $env:PFX_BASE64.Length
           $pfx = [System.Convert]::FromBase64String($env:PFX_BASE64)
           Set-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -Value $pfx -AsByteStream
           $thumbprint = (Get-PfxCertificate -FilePath .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -NoPromptForPassword).Thumbprint

@@ -71,8 +71,12 @@ jobs:
               break
             }
           }
-          if ($tags -eq $null) { Write-Output -InputObject "Not found" }
-          $tags.Count
+          if ($tags -eq $null) {
+            Write-Output -InputObject "Not found"
+          }
+          else {
+            Write-Output -InputObject $tags
+          }
           $imagebuild = ($tags | Where-Object { $_.tag -like "base-*" }).tag.split(".")[-1]
           $imagebuild.Count
           $version = "1." + [System.Text.Encoding]::UTF8.GetString($imagebuild[0..($imagebuild.Length - 5)]) + "." + [System.Text.Encoding]::UTF8.GetString($imagebuild[-4..-1])

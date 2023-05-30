@@ -59,11 +59,12 @@ jobs:
           $tags = $null
           $images.results | ForEach-Object {
             $item = $_
-            Write-Output ('Checking tags: ' + $_.tags)
+            Write-Output 'Checking tags:'
+            $_.tags
             $_.tags | ForEach-Object {
               if ($_.tag -eq "latest" -and $_.is_current -eq "True") {
                   $tags = $item
-                  Write-Output 'Found tag'
+                  Write-Output 'Tag found'
                   break
               }
             }
@@ -72,10 +73,11 @@ jobs:
             }
           }
           if ($tags -eq $null) {
-            Write-Output -InputObject "Not found"
+            Write-Output 'Tag not found'
           }
           else {
-            Write-Output -InputObject $tags
+            Write-Output 'Tag found:'
+            Write-Output $tags
           }
           $imagebuild = ($tags | Where-Object { $_.tag -like "base-*" }).tag.split(".")[-1]
           $imagebuild.Count

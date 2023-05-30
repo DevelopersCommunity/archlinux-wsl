@@ -52,20 +52,14 @@ jobs:
           $env:DOCKER_HUB_USERNAME.Length
           $request = "{ ""username"": ""$env:DOCKER_HUB_USERNAME"", ""password"": ""$env:DOCKER_HUB_PAT"" }"
           $token = (Invoke-RestMethod -Uri https://hub.docker.com/v2/users/login -Method Post -Headers @{ "Content-Type" = "application/json" } -Body $request).token
-          $token.Length
           $images = (Invoke-RestMethod -Uri https://hub.docker.com/v2/namespaces/archlinux/repositories/archlinux/images?ordering=-last_activity -Method Get -Headers @{ "Authorization" = "Bearer $token" })
-          $images.results.Count
-          $images.results
           $tags = $null
           $images.results | ForEach-Object {
             $item = $_.tags
             Write-Output 'Checking tags:'
-            $_.tags
             $_.tags | ForEach-Object {
-              if ($_.tag -eq "latest" -and $_.is_current -eq "True") {
+              if ($tags -eq $null -and $_.tag -eq "latest" -and $_.is_current -eq "True") {
                   $tags = $item
-                  Write-Output 'Tag found'
-                  break
               }
             }
           }

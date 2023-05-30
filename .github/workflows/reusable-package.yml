@@ -55,7 +55,10 @@ jobs:
           $images.results | ForEach-Object { $item = $_; $_.tags | ForEach-Object { if ($_.tag -eq "latest" -and $_.is_current -eq "True") { $tags = $item; break } }; if (Test-Path variable:tags) { break } }
           $imagebuild = ($tags | Where-Object { $_.tag -like "base-*" }).tag.split(".")[-1]
           $version = "1." + [System.Text.Encoding]::UTF8.GetString($imagebuild[0..($imagebuild.Length - 5)]) + "." + [System.Text.Encoding]::UTF8.GetString($imagebuild[-4..-1])
-          (Get-Content -Path .\DistroLauncher-Appx\MyDistro.appxmanifest) -creplace '(\bVersion=)"[\d.]+"', ('$1"' + $version + '"') > .\DistroLauncher-Appx\MyDistro.appxmanifest
+          $version
+          $manifest = (Get-Content -Path .\DistroLauncher-Appx\MyDistro.appxmanifest)
+          $manifest = $manifest -creplace '(\bVersion=)"[\d.]+"', ('$1"' + $version + '"')
+          $manifest > .\DistroLauncher-Appx\MyDistro.appxmanifest
       - name: Update thumbprint
         shell: pwsh
         env:
@@ -67,11 +70,8 @@ jobs:
           Set-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -Value $pfx -AsByteStream
           $thumbprint = (Get-PfxCertificate -FilePath .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -NoPromptForPassword).Thumbprint
           $vcxproj = (Get-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj)
-          $vcxproj.Length
           $vcxproj = $vcxproj -creplace '(<PackageCertificateThumbprint>).*(</PackageCertificateThumbprint>)', ('$1' + $thumbprint + '$2')
-          $vcxproj.Length
           $vcxproj > .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
-          Get-Item -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
       - name: Build
         shell: pwsh
         run: .\build.bat rel

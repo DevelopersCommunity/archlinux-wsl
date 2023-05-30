@@ -59,9 +59,11 @@ jobs:
           $tags = $null
           $images.results | ForEach-Object {
             $item = $_
+            Write-Output ('Checking tags: ' + $_.tags)
             $_.tags | ForEach-Object {
               if ($_.tag -eq "latest" -and $_.is_current -eq "True") {
                   $tags = $item
+                  Write-Output 'Found tag'
                   break
               }
             }

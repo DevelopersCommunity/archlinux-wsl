@@ -57,7 +57,18 @@ jobs:
           $images.results.Count
           $images.results
           $tags = $null
-          $images.results | ForEach-Object { $item = $_; $_.tags | ForEach-Object { if ($_.tag -eq "latest" -and $_.is_current -eq "True") { $tags = $item; break } }; if ($tags -ne $null) { break } }
+          $images.results | ForEach-Object {
+            $item = $_
+            $_.tags | ForEach-Object {
+              if ($_.tag -eq "latest" -and $_.is_current -eq "True") {
+                  $tags = $item
+                  break
+              }
+            }
+            if ($tags -ne $null) {
+              break
+            }
+          }
           if ($tags -eq $null) { Write-Output -InputObject "Not found" }
           $tags.Count
           $imagebuild = ($tags | Where-Object { $_.tag -like "base-*" }).tag.split(".")[-1]

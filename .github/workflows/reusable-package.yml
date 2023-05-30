@@ -66,7 +66,11 @@ jobs:
           $pfx.Length
           Set-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -Value $pfx -AsByteStream
           $thumbprint = (Get-PfxCertificate -FilePath .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -NoPromptForPassword).Thumbprint
-          (Get-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj) -creplace '(<PackageCertificateThumbprint>).*(</PackageCertificateThumbprint>)', ('$1' + $thumbprint + '$2') > .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
+          $vcxproj = (Get-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj)
+          $vcxproj.Length
+          $vcxproj = $vcxproj -creplace '(<PackageCertificateThumbprint>).*(</PackageCertificateThumbprint>)', ('$1' + $thumbprint + '$2')
+          $vcxproj.Length
+          $vcxproj > .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
           Get-Item -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
       - name: Build
         shell: pwsh

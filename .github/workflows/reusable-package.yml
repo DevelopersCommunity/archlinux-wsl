@@ -68,9 +68,6 @@ jobs:
                   break
               }
             }
-            if ($tags -ne $null) {
-              break
-            }
           }
           if ($tags -eq $null) {
             Write-Output 'Tag not found'

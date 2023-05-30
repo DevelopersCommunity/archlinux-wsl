@@ -65,9 +65,9 @@ jobs:
           $pfx = [System.Convert]::FromBase64String($env:PFX_BASE64)
           $pfx.Length
           Set-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -Value $pfx -AsByteStream
-          Get-Item -Path .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx
           $thumbprint = (Get-PfxCertificate -FilePath .\DistroLauncher-Appx\DistroLauncher-Appx_TemporaryKey.pfx -NoPromptForPassword).Thumbprint
           (Get-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj) -creplace '(<PackageCertificateThumbprint>).*(</PackageCertificateThumbprint>)', ('$1' + $thumbprint + '$2') > .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
+          Get-Item -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
       - name: Build
         shell: pwsh
         run: .\build.bat rel

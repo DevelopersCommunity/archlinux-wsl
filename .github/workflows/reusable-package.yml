@@ -84,5 +84,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: package
-          path: x64\Release\DistroLauncher-Appx\Upload\DistroLauncher-Appx_*\DistroLauncher-Appx_*_x64.msixbundle
+          path: x64\Release\DistroLauncher-Appx\DistroLauncher-Appx_*_x64.msix
           if-no-files-found: error

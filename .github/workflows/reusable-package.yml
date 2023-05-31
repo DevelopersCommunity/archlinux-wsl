@@ -51,21 +51,16 @@ jobs:
         run: |
           $request = "{ ""username"": ""$env:DOCKER_HUB_USERNAME"", ""password"": ""$env:DOCKER_HUB_PAT"" }"
           $token = (Invoke-RestMethod -Uri https://hub.docker.com/v2/users/login -Method Post -Headers @{ "Content-Type" = "application/json" } -Body $request).token
-          $images = (Invoke-RestMethod -Uri 'https://hub.docker.com/v2/namespaces/library/repositories/archlinux/images?ordering=-last_activity&page=1' -Method Get -Headers @{ "Authorization" = "Bearer $token" })
-          $tags = $null
-          $images.results | ForEach-Object {
-            $item = $_.tags
-            $_.tags | ForEach-Object {
-              if ($tags -eq $null -and $_.tag -eq "latest" -and $_.is_current -eq "True") {
-                  $tags = $item
-              }
-            }
-          }
-          $imagebuild = ($tags | Where-Object { $_.tag -like "base-*" }).tag.split(".")[-1]
+          $latest = (Invoke-RestMethod -Uri https://hub.docker.com/v2/namespaces/library/repositories/archlinux/tags/latest -Method Get -Headers @{ "Authorization" = "Bearer ${token}" }).digest
+          $tags = (Invoke-RestMethod -Uri "https://hub.docker.com/v2/namespaces/library/repositories/archlinux/images/$latest/tags" -Method Get -Headers @{ "Authorization" = "Bearer ${token}" }).results
+          $imagetag = ($tags | Where-Object { $_.tag -like "base-*" }).tag
+          $imagebuild = $imagetag.split(".")[-1]
           $version = "1." + [System.Text.Encoding]::UTF8.GetString($imagebuild[0..($imagebuild.Length - 5)]) + "." + [System.Text.Encoding]::UTF8.GetString($imagebuild[-4..-1])
           $manifest = (Get-Content -Path .\DistroLauncher-Appx\MyDistro.appxmanifest)
           $manifest = $manifest -creplace '(\bVersion=)"[\d.]+"', ('$1"' + $version + '.0"')
           $manifest > .\DistroLauncher-Appx\MyDistro.appxmanifest
+          $imagetag > .\imagetag.txt
+          "v$version" > .\tag.txt
       - name: Update thumbprint
         shell: pwsh
         env:
@@ -77,6 +72,9 @@ jobs:
           $vcxproj = (Get-Content -Path .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj)
           $vcxproj = $vcxproj -creplace '(<PackageCertificateThumbprint>).*(</PackageCertificateThumbprint>)', ('$1' + $thumbprint + '$2')
           $vcxproj > .\DistroLauncher-Appx\DistroLauncher-Appx.vcxproj
+      - name: Export certificate
+        shell: pwsh
+        run: "openssl pkcs12 -in .\\DistroLauncher-Appx\\DistroLauncher-Appx_TemporaryKey.pfx -out .\\DistroLauncher-Appx_TemporaryKey.crt -nokeys -passin pass:"
       - name: Build
         shell: pwsh
         run: .\build.bat rel
@@ -84,5 +82,9 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: package
-          path: x64\Release\DistroLauncher-Appx\Upload\DistroLauncher-Appx_*\DistroLauncher-Appx_*_x64.msixbundle
+          path: |
+            x64\Release\DistroLauncher-Appx\DistroLauncher-Appx_*_x64.msix
+            DistroLauncher-Appx_TemporaryKey.crt
+            imagetag.txt
+            tag.txt
           if-no-files-found: error

@@ -1,0 +1,22 @@
+name: Release
+on:
+  workflow_dispatch:
+jobs:
+  package:
+    uses: ./.github/workflows/reusable-package.yml
+    secrets: inherit
+  release:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+      - name: Create release
+        run: |
+          tag=$(cat package/tag.txt)
+          imagetag=$(cat package/imagetag.txt)
+          gh release create "${tag::-1}" --notes "Arch Linux WSL installer based on the Docker image \`archlinux:${imagetag::-1}\`" ./package/x64/Release/DistroLauncher-Appx/*.msix ./package/DistroLauncher-Appx_TemporaryKey.crt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -21,6 +21,9 @@ namespace DistributionInfo
     // Initialize Pacman mirrorlist and keyring
     bool InitializePacman();
 
+    // Enable chronyd service
+    bool EnableChrony();
+
     // Generate D-Bus UUID
     bool GenerateDBusUuid();
 

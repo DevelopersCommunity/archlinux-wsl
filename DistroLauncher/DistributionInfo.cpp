@@ -67,6 +67,8 @@ bool DistributionInfo::EnableChrony()
     if ((FAILED(hr)) || (exitCode != 0)) {
         return false;
     }
+
+    return true;
 }
 
 bool DistributionInfo::GenerateDBusUuid()

@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'main'
+  workflow_dispatch:
 jobs:
   package:
     uses: ./.github/workflows/reusable-package.yml

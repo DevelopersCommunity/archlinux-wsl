@@ -15,20 +15,22 @@ repository](https://gitlab.archlinux.org/archlinux/archlinux-docker/-/releases)
 with the following changes:
 
 - `NoExtract` options removed from
-[/etc/pacman.conf](https://archlinux.org/pacman/pacman.conf.5.html).
-- [sudo](https://archlinux.org/packages/core/x86_64/sudo/) and
-[reflector](https://archlinux.org/packages/extra/any/reflector/) packages
-installed
+[`/etc/pacman.conf`](https://archlinux.org/pacman/pacman.conf.5.html).
+- [`chrony`](https://archlinux.org/packages/extra/x86_64/chrony/),
+[`reflector`](https://archlinux.org/packages/extra/any/reflector/), and
+[`sudo`](https://archlinux.org/packages/core/x86_64/sudo/) packages installed
+- Clock synchronization configured with
+[`chrony`](https://learn.microsoft.com/en-us/azure/virtual-machines/linux/time-sync#chrony)
 - `wheel` group added to `sudoers`
 - [Generate locales](https://wiki.archlinux.org/title/locale#Generating_locales)
-- Enable [systemd](https://aka.ms/wslsystemd)
+- [`systemd`](https://aka.ms/wslsystemd) enabled
 
 The script used to make these changes is available in the
-[scripts](./scripts/1-arch.sh) directory.
+[scripts'](./scripts/1-arch.sh) directory.
 
 ## Installation
 
-The Arch Linux installer is packaged with the [MSIX
+The Arch Linux installer is packaged with the [`MSIX`
 format](https://docs.microsoft.com/windows/msix/), and is available in the
 [releases
 page](https://github.com/DevelopersCommunity/WSL-DistroLauncher/releases) The
@@ -36,7 +38,7 @@ package was signed with a self-signed certificate, you need to import it into
 one of your local machine certificate trusted store (for example, `Trusted
 People`) before executing the installer. Run the following PowerShell command to
 import it (you will need administrative privileges). The certificate is
-available in the [scripts](./scripts/DistroLauncher-Appx_TemporaryKey.crt)
+available in the [scripts'](./scripts/DistroLauncher-Appx_TemporaryKey.crt)
 directory. After installing the package, you can remove it from your store.
 
 ```powershell
@@ -46,12 +48,12 @@ Import-Certificate `
 ```
 
 Besides creating the default user, the installation process also initializes the
-pacman [mirror list](https://wiki.archlinux.org/title/mirrors) and the
-[keyring](https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_all_the_keys).
+`pacman` [mirror list](https://wiki.archlinux.org/title/mirrors) and its [key
+ring](https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_all_the_keys).
 
 ## Post-installation
 
-- [Enable pacman parallel
+- [Enable `pacman` parallel
 downloads](https://wiki.archlinux.org/title/Pacman#Enabling_parallel_downloads)
 - [Install a text
 editor](https://wiki.archlinux.org/title/Category:Text_editors)
@@ -151,25 +153,26 @@ Use the Windows Start menu to open the "Developer Command Prompt for Visual
 Studio", go to the root folder of this project and run `.\build.bat rel`.
 
 Once you've completed the build, the packaged `MSIX` should be placed in the
-folder `x64\Release\DistroLauncher-Appx` and should be named something like
+folder `x64\Release\DistroLauncher-Appx` and should have a name with the format
 `DistroLauncher-Appx_1.1.XXXXX.0_x64.msix`.
 
 Before using the package, you need to import the certificate used to sign it.
-You can extract the certificate with _Git Bash_ and
-[OpenSSL](https://www.openssl.org/):
+You can extract the certificate with [Git Bash](https://gitforwindows.org/)
+and [OpenSSL](https://www.openssl.org/):
 
 ```bash
 openssl pkcs12 \
     -in path/to/DistroLauncher-Appx_TemporaryKey.pfx \
     -out path/to/DistroLauncher-Appx_TemporaryKey.crt \
-    -nokeys
+    -nokeys \
+    -passin pass:
 ```
 
 After extracting the certificate, you can import it to a certificate store with
 the same command described in the [installation section](#installation).
 
-With the certificate installed, simply double-click the `MSIX` file to start
-your custom distro installation process.
+With the certificate installed, double-click the `MSIX` file to start your
+custom distro installation process.
 
 ## Arch Linux trademark
 

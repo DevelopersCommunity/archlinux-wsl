@@ -41,6 +41,11 @@ HRESULT InstallDistribution(bool createUser)
         return E_FAIL;
     }
 
+    // Enable chronyd service
+    if (!DistributionInfo::EnableChrony()) {
+        return E_FAIL;
+    }
+
     // Generate D-Bus UUID
     if (!DistributionInfo::GenerateDBusUuid()) {
         return E_FAIL;

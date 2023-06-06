@@ -59,6 +59,18 @@ bool DistributionInfo::InitializePacman()
     return true;
 }
 
+bool DistributionInfo::EnableChrony()
+{
+    DWORD exitCode;
+    std::wstring commandLine = L"/bin/systemctl enable --now chronyd.service";
+    HRESULT hr = g_wslApi.WslLaunchInteractive(commandLine.c_str(), true, &exitCode);
+    if ((FAILED(hr)) || (exitCode != 0)) {
+        return false;
+    }
+
+    return true;
+}
+
 bool DistributionInfo::GenerateDBusUuid()
 {
     DWORD exitCode;

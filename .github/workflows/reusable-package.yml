@@ -47,9 +47,9 @@ jobs:
         run: |
           $request = "{ ""username"": ""$env:DOCKER_HUB_USERNAME"", ""password"": ""$env:DOCKER_HUB_PAT"" }"
           $token = (Invoke-RestMethod -Uri https://hub.docker.com/v2/users/login -Method Post -Headers @{ "Content-Type" = "application/json" } -Body $request).token
-          $latest = (Invoke-RestMethod -Uri https://hub.docker.com/v2/namespaces/library/repositories/archlinux/tags/latest -Method Get -Headers @{ "Authorization" = "Bearer ${token}" }).digest
-          $tags = (Invoke-RestMethod -Uri "https://hub.docker.com/v2/namespaces/library/repositories/archlinux/images/$latest/tags" -Method Get -Headers @{ "Authorization" = "Bearer ${token}" }).results
-          $imagetag = ($tags | Where-Object { $_.tag -like "base-*" }).tag
+          $digest = (Invoke-RestMethod -Uri https://hub.docker.com/v2/namespaces/library/repositories/archlinux/tags/base -Method Get -Headers @{ "Authorization" = "Bearer ${token}" }).digest
+          $tags = (Invoke-RestMethod -Uri "https://hub.docker.com/v2/namespaces/library/repositories/archlinux/tags/?page=1&page_size=100" -Method Get -Headers @{ "Authorization" = "Bearer ${token}" }).results
+          $imagetag = ($tags | Where-Object { $_.name -like "base-*" -and $_.digest -eq $digest}).name
           $imagebuild = $imagetag.split(".")[-1]
           $version = "1." + [System.Text.Encoding]::UTF8.GetString($imagebuild[0..($imagebuild.Length - 5)]) + "." + [System.Text.Encoding]::UTF8.GetString($imagebuild[-4..-1])
           $manifest = (Get-Content -Path .\DistroLauncher-Appx\MyDistro.appxmanifest)

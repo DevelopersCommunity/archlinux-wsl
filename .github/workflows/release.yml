@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
       - name: Create release
         run: |
-          tag=$(cat package/tag.txt)
-          imagetag=$(cat package/imagetag.txt)
-          gh release create "${tag::-1}" --notes "Arch Linux WSL installer based on the Docker image \`archlinux:${imagetag::-1}\`" ./package/x64/Release/DistroLauncher-Appx/*.msix ./package/DistroLauncher-Appx_TemporaryKey.crt
+          imagetag=$(cat artifacts/imagetag.txt)
+          tag="${imagetag#base-}"
+          gh release create "${tag}" --notes "Arch Linux WSL modern distribution based on the Docker image \`archlinux:${imagetag}\`" ./artifacts/archlinux.wsl.gz ./artifacts/DistributionInfo.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

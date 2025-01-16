@@ -1,183 +1,79 @@
-# WSL Arch Linux Launcher
+# Custom Arch Linux distribution for WSL
 
-## Introduction
+This is an automated script to create an [Arch Linux](https://archlinux.org)
+[WSL](https://aka.ms/wsl/) [modern
+distribution](https://learn.microsoft.com/windows/wsl/build-custom-distro).
 
-This is an [Arch Linux](https://archlinux.org) installer/launcher for the
-[Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/windows/wsl/).
-This installer was built using the [WSL Distro Launcher Reference
-Implementation](https://github.com/microsoft/WSL-DistroLauncher).
+You can download a pre-built version from the [releases
+page](https://github.com/DevelopersCommunity/archlinux-wsl/releases/latest).
+Get the `archlinux.wsl.gz` file, decompress it, and double-click the
+`archlinux.wsl` file to install it.
 
-## Image
+## Requirements
 
-The image used by this installer is based on the Arch Linux docker base image
-available in the [Arch Linux docker
-repository](https://gitlab.archlinux.org/archlinux/archlinux-docker/-/releases)
-with the following changes:
-
-- `NoExtract` options removed from
-[`/etc/pacman.conf`](https://archlinux.org/pacman/pacman.conf.5.html).
-- [`chrony`](https://archlinux.org/packages/extra/x86_64/chrony/),
-[`reflector`](https://archlinux.org/packages/extra/any/reflector/), and
-[`sudo`](https://archlinux.org/packages/core/x86_64/sudo/) packages installed
-- Clock synchronization configured with
-[`chrony`](https://learn.microsoft.com/en-us/azure/virtual-machines/linux/time-sync#chrony)
-- `wheel` group added to `sudoers`
-- [Generate locales](https://wiki.archlinux.org/title/locale#Generating_locales)
-- [`systemd`](https://aka.ms/wslsystemd) enabled
-
-The script used to make these changes is available in the
-[scripts'](./scripts/1-arch.sh) directory.
-
-## Installation
-
-The Arch Linux installer is packaged with the [`MSIX`
-format](https://docs.microsoft.com/windows/msix/), and is available in the
-[releases
-page](https://github.com/DevelopersCommunity/WSL-DistroLauncher/releases) The
-package was signed with a self-signed certificate, you need to import it into
-one of your local machine certificate trusted store (for example, `Trusted
-People`) before executing the installer. Run the following PowerShell command to
-import it (you will need administrative privileges). The certificate is
-available in the [scripts'](./scripts/DistroLauncher-Appx_TemporaryKey.crt)
-directory. After installing the package, you can remove it from your store.
+You need [WSL release 2.4.4 or higher](https://github.com/microsoft/WSL/releases)
+to use this installation method. To install a pre-release version of WSL, run the
+following command:
 
 ```powershell
-Import-Certificate `
-    -FilePath .\DistroLauncher-Appx_TemporaryKey.crt `
-    -CertStoreLocation cert:\LocalMachine\TrustedPeople
+wsl --update --pre-release
 ```
 
-Besides creating the default user, the installation process also initializes the
-`pacman` [mirror list](https://wiki.archlinux.org/title/mirrors) and its [key
-ring](https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_all_the_keys).
+To build the distribution, you need the following tools:
 
-## Post-installation
+- [Docker Engine](https://docs.docker.com/engine/). On Windows, you can build
+the distribution using [WSL with Docker
+support](https://docs.docker.com/desktop/features/wsl/).
+- [Docker Buildx](https://docs.docker.com/build/concepts/overview/)
+- [Docker personal access
+token](https://docs.docker.com/security/for-developers/access-tokens/)
+- [curl](https://curl.se/)
+- [Node.js](https://nodejs.org/)
+- [jq](https://jqlang.github.io/jq/)
+- [grep](https://www.gnu.org/software/grep/)
 
-- [Enable `pacman` parallel
-downloads](https://wiki.archlinux.org/title/Pacman#Enabling_parallel_downloads)
-- [Install a text
-editor](https://wiki.archlinux.org/title/Category:Text_editors)
+## Build
 
-## Customize the image
+Before building, create a `.env` file with your Docker credentials:
 
-You can package your own custom image with the following steps. More details are
-available at
-<https://docs.microsoft.com/windows/wsl/use-custom-distro#import-the-tar-file-into-wsl>.
-
-1. Create a folder to store the distribution (for example,
-`C:\wslDistroStorage\ArchLinux`).
-1. Download one of the images available at
-<https://gitlab.archlinux.org/archlinux/archlinux-docker/-/releases>. Extract
-the `tar` file to any folder and run the following command to import it to WSL:
-
-    ```powershell
-    wsl --import ArchLinux `
-        C:\wslDistroStorage\ArchLinux `
-        .\base-XXXXXXXX.X.XXXXX.tar
-    ```
-
-1. Use the command `wsl -d ArchLinux` to run the newly imported Arch Linux
-distribution.
-1. Make any customization you want to your distro.
-1. When you are done with the customization, logout from `WSL` and run the
-following commands to export the image. You can install
-[7-zip](https://7-zip.org/) by running `winget install -e --id 7zip.7zip`.
-
-    ```powershell
-    wsl --terminate ArchLinux
-    wsl --export ArchLinux .\install.tar
-    & "$env:ProgramFiles\7-Zip\7z.exe" a .\install.tar.gz .\install.tar
-    
-    # Optionally remove this distro
-    # wsl --unregister ArchLinux
-    ```
-
-## Set up the development environment
-
-If you don't have Visual Studio, you can download the free Community edition
-with `winget`:
-
-```powershell
-winget install -e --id Microsoft.VisualStudio.2022.Community
-
-# Run the following command with an elevated PowerShell session
-# to install the required workloads to build this project
-& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe" modify `
-    --productId Microsoft.VisualStudio.Product.Community `
-    --channelId VisualStudio.17.Release `
-    --add Microsoft.VisualStudio.Workload.NativeDesktop `
-    --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
-    --add Microsoft.VisualStudio.Component.Windows10SDK.19041 `
-    --add Microsoft.VisualStudio.Workload.Universal `
-    --passive
+```env
+DOCKER_HUB_USERNAME=<your docker user name>
+DOCKER_HUB_PAT=<your docker account personal access token>
 ```
 
-Open the main solution `DistroLauncher.sln` with Visual Studio and generate a
-test certificate:
+Then run the [`build`](./build) script to create the `archlinux.wsl` file.
 
-1. In Visual Studio, open `DistroLauncher-Appx/MyDistro.appxmanifest`
-1. Select the Packaging tab
-1. Select "Choose Certificate"
-1. Click the "Create" button
+## Windows Terminal profile
 
-## Building the project
+The build process creates a custom profile for the [Windows
+Terminal](https://learn.microsoft.com/windows/terminal/). The color scheme is a
+[Material Design dynamically generated color
+scheme](https://m3.material.io/styles/color/dynamic/choosing-a-source) based on
+the [Arch Linux logo](https://archlinux.org/art/) blue color. The script to
+generate the profile is available in the [`terminal-profile`
+directory](./terminal-profile/).
 
-Create a sub-folder with name `x64` in the root folder of this project and copy
-the customized `image.tar.gz` file to it.
+## Known issues
 
-```powershell
-PS C:\repos\archlinux-wsl> tree /F
-Folder PATH listing
-C:.
-│   .gitignore
-│   build.bat
-│   DistroLauncher.sln
-│   LICENSE
-│   README.md
-│
-├───DistroLauncher
-|   |   ...
-|
-├───DistroLauncher-Appx
-│   │   ...
-│
-├───scripts
-|   |   ...
-│
-└───x64
-    │   install.tar.gz
-    │   ...
+### systemd services won't start
+
+If you get the following error when running the `systemctl` command, try to
+[install another WSL distribution with `systemd`
+support](https://aka.ms/wslsystemd/) and check if it works. In my case,
+`systemd` started working on Arch Linux after that, and kept working even after
+uninstalling the other distro.
+
+```terminal
+$ systemctl
+Failed to connect to system scope bus via local transport: No such file or directory
 ```
-
-Use the Windows Start menu to open the "Developer Command Prompt for Visual
-Studio", go to the root folder of this project and run `.\build.bat rel`.
-
-Once you've completed the build, the packaged `MSIX` should be placed in the
-folder `x64\Release\DistroLauncher-Appx` and should have a name with the format
-`DistroLauncher-Appx_1.1.XXXXX.0_x64.msix`.
-
-Before using the package, you need to import the certificate used to sign it.
-You can extract the certificate with [Git Bash](https://gitforwindows.org/)
-and [OpenSSL](https://www.openssl.org/):
-
-```bash
-openssl pkcs12 \
-    -in path/to/DistroLauncher-Appx_TemporaryKey.pfx \
-    -out path/to/DistroLauncher-Appx_TemporaryKey.crt \
-    -nokeys \
-    -passin pass:
-```
-
-After extracting the certificate, you can import it to a certificate store with
-the same command described in the [installation section](#installation).
-
-With the certificate installed, double-click the `MSIX` file to start your
-custom distro installation process.
 
 ## Arch Linux trademark
-
-The logos used in this launcher were taken from the [Arch Linux logos and
-artwork page](https://archlinux.org/art/), and I believe their usage in this
+ 
+The logo used in this distribution was taken from the [Arch Linux logos and
+artwork page](https://archlinux.org/art/), and I believe its usage in this
 project fits the [permitted
 use](https://wiki.archlinux.org/title/DeveloperWiki:TrademarkPolicy#Permitted_Use)
 condition from their trademark policy.
+
+<!-- vim: set spell spelllang=en: -->

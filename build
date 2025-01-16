@@ -1,0 +1,42 @@
+#!/bin/bash
+#
+# Build WSL tar image
+
+set -eu
+
+[[ -f .env ]] && source .env
+
+pushd terminal-profile || exit 1
+npm install
+node index.js >../root/usr/lib/wsl/terminal-profile.json
+popd || exit 1
+
+token=$(curl \
+  -d "{ \"username\": \"${DOCKER_HUB_USERNAME}\", \"password\": \"${DOCKER_HUB_PAT}\" }" \
+  -H "Content-Type: application/json" \
+  -Ss \
+  https://hub.docker.com/v2/users/login/ |
+  jq -r .token)
+
+digest=$(curl \
+  -H "Authorization: Bearer ${token}" \
+  -Ss \
+  https://hub.docker.com/v2/namespaces/library/repositories/archlinux/tags/base |
+  jq -r .digest)
+
+tag=$(curl \
+  -H "Authorization: Bearer ${token}" \
+  -Ss \
+  https://hub.docker.com/v2/namespaces/library/repositories/archlinux/tags/?page=1\&page_size=100 |
+  jq -r ".results[] | select(.digest == \"${digest}\") | .name" |
+  grep "^base-.*$")
+echo "${tag}" >imagetag.txt
+
+dockerfile=$(cat Dockerfile)
+dockerfile="${dockerfile/FROM archlinux:base/FROM archlinux:${tag}}"
+
+docker buildx build -t archwsl:latest -f - . <<<"${dockerfile}"
+
+docker run -t --name wsl_export archwsl:latest ls /
+docker export wsl_export >archlinux.wsl
+docker rm wsl_export

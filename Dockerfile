@@ -1,4 +1,9 @@
-FROM archlinux:latest
+FROM archlinux:base
 
-COPY scripts/1-arch.sh ./1-arch.sh
-RUN chmod +x ./1-arch.sh && ./1-arch.sh && rm ./1-arch.sh
+COPY --chown=root:root --chmod=0644 root/etc/wsl.conf root/etc/wsl-distribution.conf /etc/
+COPY --chown=root:root --chmod=0755 root/etc/oobe.sh /etc/
+
+COPY root/usr/lib/wsl/* /usr/lib/wsl/
+
+COPY --chmod=0755 configure.sh ./configure.sh
+RUN ./configure.sh && rm ./configure.sh

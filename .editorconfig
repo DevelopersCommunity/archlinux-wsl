@@ -1,0 +1,21 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+[*]
+end_of_line = lf
+charset = utf-8
+indent_style = space
+indent_size = 2
+
+[*.sh]
+# --language-variant
+shell_variant      = bash
+binary_next_line   = true
+# --case-indent
+switch_case_indent = true
+
+[*.md]
+max_line_length = 80
+indent_size = 4

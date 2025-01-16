@@ -1,0 +1,15 @@
+{
+  "name": "terminal-profile",
+  "version": "1.0.0",
+  "description": "Material Design-based color scheme generator for Windows Terminal",
+  "license": "MIT",
+  "author": "Alexandre Teoi",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@material/material-color-utilities": "^0.3.0"
+  }
+}

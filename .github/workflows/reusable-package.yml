@@ -18,8 +18,7 @@ jobs:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
         run: |
           ./build
-          gzip --best archlinux.wsl
-          sha256=$(sha256sum archlinux.wsl.gz)
+          sha256=$(sha256sum archlinux.wsl)
           read -r sha256 _ <<<"${sha256}"
           tag=$(cat imagetag.txt)
           version="${tag#base-}"
@@ -32,7 +31,7 @@ jobs:
                   "Default": true,
                   "FriendlyName": "Arch Linux Unofficial version ${version} (latest)",
                   "Amd64Url": {
-                    "Url": "https://github.com/DevelopersCommunity/archlinux-wsl/releases/download/${version}/archlinux.wsl.gz",
+                    "Url": "https://github.com/DevelopersCommunity/archlinux-wsl/releases/download/${version}/archlinux.wsl",
                     "Sha256": "${sha256}"
                   }
                 }
@@ -45,7 +44,7 @@ jobs:
         with:
           name: artifacts
           path: |
-            archlinux.wsl.gz
+            archlinux.wsl
             imagetag.txt
             DistributionInfo.json
           if-no-files-found: error

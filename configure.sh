@@ -4,6 +4,17 @@
 
 set -eu
 
+# Apply systemd recommendations
+# https://learn.microsoft.com/en-us/windows/wsl/build-custom-distro#systemd-recommendations
+/bin/systemctl mask systemd-resolved.service
+/bin/systemctl mask systemd-networkd.service
+/bin/systemctl mask systemd-tmpfiles-setup.service
+/bin/systemctl mask systemd-tmpfiles-clean.service
+/bin/systemctl mask systemd-tmpfiles-clean.timer
+/bin/systemctl mask systemd-tmpfiles-setup-dev-early.service
+/bin/systemctl mask systemd-tmpfiles-setup-dev.service
+/bin/systemctl mask tmp.mount
+
 # Enable pacman progress bar and remove NoExtract options.
 # https://gitlab.archlinux.org/archlinux/archlinux-docker/-/blob/master/scripts/make-rootfs.sh?ref_type=heads#L17
 pacman=$(cat /etc/pacman.conf)

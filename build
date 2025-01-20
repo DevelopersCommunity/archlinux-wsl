@@ -1,15 +1,18 @@
 #!/bin/bash
 #
-# Build WSL tar image
+# Build an Arch Linux WSL tar image
 
 set -eu
 
-[[ -f .env ]] && source .env
-
+# Generate a Windows Terminal profile
+# https://learn.microsoft.com/windows/wsl/build-custom-distro#generate-a-windows-terminal-profile
 pushd terminal-profile || exit 1
 npm install
 node index.js >../root/usr/lib/wsl/terminal-profile.json
 popd || exit 1
+
+# Create an Arch Linux image based on its latest base Docker image
+[[ -f .env ]] && source .env
 
 token=$(curl \
   -d "{ \"username\": \"${DOCKER_HUB_USERNAME}\", \"password\": \"${DOCKER_HUB_PAT}\" }" \
@@ -34,9 +37,20 @@ echo "${tag}" >imagetag.txt
 
 dockerfile=$(cat Dockerfile)
 dockerfile="${dockerfile/FROM archlinux:base/FROM archlinux:${tag}}"
+docker buildx build -t "archwsl:${tag}" -f - . <<<"${dockerfile}"
 
-docker buildx build -t archwsl:latest -f - . <<<"${dockerfile}"
-
-docker run -t --name wsl_export archwsl:latest ls /
-docker export wsl_export >archlinux.wsl
+# Export the tar from the container
+# https://learn.microsoft.com/windows/wsl/use-custom-distro#export-the-tar-from-a-container
+docker run -t --name wsl_export "archwsl:${tag}" ls /
+docker export wsl_export >archlinux.tar
 docker rm wsl_export
+docker rmi "archwsl:${tag}"
+
+# Apply configuration file recommendations
+# https://learn.microsoft.com/windows/wsl/build-custom-distro#configuration-file-recommendations
+[[ -d rootfs ]] && rm -rf rootfs
+mkdir rootfs
+pushd rootfs || exit 1
+fakeroot bash -c "tar -xf ../archlinux.tar && rm -f etc/resolv.conf && tar --numeric-owner --absolute-names -c -- * | gzip --best >../archlinux.wsl"
+popd || exit 1
+rm archlinux.tar

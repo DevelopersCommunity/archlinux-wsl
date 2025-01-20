@@ -6,14 +6,14 @@ distribution](https://learn.microsoft.com/windows/wsl/build-custom-distro).
 
 You can download a pre-built version from the [releases
 page](https://github.com/DevelopersCommunity/archlinux-wsl/releases/latest).
-Get the `archlinux.wsl.gz` file, decompress it, and double-click the
-`archlinux.wsl` file to install it.
+Get the `archlinux.wsl` file and double-click it in `File Explorer` to
+install the distribution.
 
 ## Requirements
 
 You need [WSL release 2.4.4 or higher](https://github.com/microsoft/WSL/releases)
-to use this installation method. To install a pre-release version of WSL, run the
-following command:
+to use this installation method. To install a pre-release version of WSL, run
+the following command:
 
 ```powershell
 wsl --update --pre-release
@@ -31,6 +31,7 @@ token](https://docs.docker.com/security/for-developers/access-tokens/)
 - [Node.js](https://nodejs.org/)
 - [jq](https://jqlang.github.io/jq/)
 - [grep](https://www.gnu.org/software/grep/)
+- [fakeroot](https://man.archlinux.org/man/fakeroot.1)
 
 ## Build
 
@@ -66,6 +67,15 @@ uninstalling the other distro.
 ```terminal
 $ systemctl
 Failed to connect to system scope bus via local transport: No such file or directory
+```
+
+If you still have problems after installing another distribution, try to run the
+following
+[command](https://github.com/microsoft/WSL/issues/10205#issuecomment-1601620093)
+in a `PowerShell` terminal:
+
+```powershell
+wsl -d Arch-Linux-Unofficial -u root -e systemctl restart user@1000.service
 ```
 
 ## Arch Linux trademark

@@ -48,9 +48,9 @@ docker rmi "archwsl:${tag}"
 
 # Apply configuration file recommendations
 # https://learn.microsoft.com/windows/wsl/build-custom-distro#configuration-file-recommendations
-tar --delete -f archlinux.tar etc/resolv.conf
-
-# Create the tar file
-# https://learn.microsoft.com/windows/wsl/build-custom-distro#create-the-tar-file
-gzip --best --force archlinux.tar
-mv archlinux.tar.gz archlinux.wsl
+[[ -d rootfs ]] && rm -rf rootfs
+mkdir rootfs
+pushd rootfs || exit 1
+fakeroot bash -c "tar -xf ../archlinux.tar && rm -f etc/resolv.conf && tar --numeric-owner --absolute-names -c -- * | gzip --best >../archlinux.wsl"
+popd || exit 1
+rm archlinux.tar

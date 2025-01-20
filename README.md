@@ -31,7 +31,7 @@ token](https://docs.docker.com/security/for-developers/access-tokens/)
 - [Node.js](https://nodejs.org/)
 - [jq](https://jqlang.github.io/jq/)
 - [grep](https://www.gnu.org/software/grep/)
-- [fakeroot](https://man.archlinux.org/man/fakeroot.1.en)
+- [fakeroot](https://man.archlinux.org/man/fakeroot.1)
 
 ## Build
 

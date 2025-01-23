@@ -5,9 +5,9 @@ This is an automated script to create an [Arch Linux](https://archlinux.org)
 distribution](https://learn.microsoft.com/windows/wsl/build-custom-distro).
 
 You can download a pre-built version from the [releases
-page](https://github.com/DevelopersCommunity/archlinux-wsl/releases/latest).
-Get the `archlinux.wsl` file and double-click it in `File Explorer` to
-install the distribution.
+page](https://github.com/DevelopersCommunity/archlinux-wsl/releases/latest). Get
+the `.wsl` file and double-click it in `File Explorer` to install the
+distribution.
 
 ## Requirements
 
@@ -53,30 +53,6 @@ scheme](https://m3.material.io/styles/color/dynamic/choosing-a-source) based on
 the [Arch Linux logo](https://archlinux.org/art/) blue color. The script to
 generate the profile is available in the [`terminal-profile`
 directory](./terminal-profile/).
-
-## Known issues
-
-### systemd services won't start
-
-If you get the following error when running the `systemctl` command, try to
-[install another WSL distribution with `systemd`
-support](https://aka.ms/wslsystemd/) and check if it works. In my case,
-`systemd` started working on Arch Linux after that, and kept working even after
-uninstalling the other distro.
-
-```terminal
-$ systemctl
-Failed to connect to system scope bus via local transport: No such file or directory
-```
-
-If you still have problems after installing another distribution, try to run the
-following
-[command](https://github.com/microsoft/WSL/issues/10205#issuecomment-1601620093)
-in a `PowerShell` terminal:
-
-```powershell
-wsl -d Arch-Linux-Unofficial -u root -e systemctl restart user@1000.service
-```
 
 ## Arch Linux trademark
  

@@ -24,19 +24,19 @@ jobs:
           version="${tag#base-}"
           cat <<EOF >DistributionInfo.json
           {
-            "ModernDistributions": {
-              "Arch-Linux-Unofficial": [
-                {
-                  "Name": "Arch-Linux-Unofficial-${tag}",
-                  "Default": true,
-                  "FriendlyName": "Arch Linux Unofficial version ${version} (latest)",
-                  "Amd64Url": {
-                    "Url": "https://github.com/DevelopersCommunity/archlinux-wsl/releases/download/${version}/archlinux.wsl",
-                    "Sha256": "${sha256}"
-                  }
-                }
-              ]
-            }
+              "ModernDistributions": {
+                  "Arch-Linux-Unofficial": [
+                      {
+                          "Name": "Arch-Linux-Unofficial",
+                          "Default": true,
+                          "FriendlyName": "Arch Linux Unofficial Rolling Release",
+                          "Amd64Url": {
+                              "Url": "https://github.com/DevelopersCommunity/archlinux-wsl/releases/download/${version}/archlinux-${tag}.wsl",
+                              "Sha256": "${sha256}"
+                          }
+                      }
+                  ]
+              }
           }
           EOF
       - name: Upload artifacts
@@ -44,7 +44,7 @@ jobs:
         with:
           name: artifacts
           path: |
-            archlinux.wsl
+            archlinux-*.wsl
             imagetag.txt
             DistributionInfo.json
           if-no-files-found: error

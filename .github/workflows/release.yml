@@ -19,7 +19,7 @@ jobs:
           tag="${imagetag#base-}"
           gh release create "${tag}" \
             --notes "Arch Linux WSL modern distribution based on the Docker image \`archlinux:${imagetag}\`" \
-            ./artifacts/archlinux.wsl \
+            ./artifacts/archlinux-${imagetag}.wsl \
             ./artifacts/DistributionInfo.json
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

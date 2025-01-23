@@ -51,6 +51,18 @@ docker rmi "archwsl:${tag}"
 [[ -d rootfs ]] && rm -rf rootfs
 mkdir rootfs
 pushd rootfs || exit 1
-fakeroot bash -c "tar -xf ../archlinux.tar && rm -f etc/resolv.conf && tar --numeric-owner --absolute-names -c -- * | gzip --best >../archlinux.wsl"
+trim=$(
+  cat <<EOF
+tar -xf ../archlinux.tar &&
+  rm -f etc/resolv.conf &&
+  rm -f .dockerenv &&
+  rm -rf boot &&
+  rm -rf dev &&
+  rm -rf run &&
+  tar --numeric-owner --absolute-names -c -- * |
+  gzip --best >../archlinux-${tag}.wsl
+EOF
+)
+fakeroot bash -c "${trim}"
 popd || exit 1
 rm archlinux.tar

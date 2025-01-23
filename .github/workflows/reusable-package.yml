@@ -18,9 +18,9 @@ jobs:
           DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
         run: |
           ./build
-          sha256=$(sha256sum archlinux.wsl)
-          read -r sha256 _ <<<"${sha256}"
           tag=$(cat imagetag.txt)
+          sha256=$(sha256sum archlinux-${tag}.wsl)
+          read -r sha256 _ <<<"${sha256}"
           version="${tag#base-}"
           cat <<EOF >DistributionInfo.json
           {

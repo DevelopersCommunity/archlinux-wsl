@@ -23,6 +23,28 @@ const ColorName = {
   foreground: 'foreground',
 }
 
+/** @enum {number} */
+const XtermColors = {
+  // Colors taken from xterm.
+  // https://github.com/xterm-x11/xterm-snapshots/blob/5b7a08a3482b425c97610190228e58b51ac6c39b/vttests/88colors2.pl#L160-L175
+  black: argbFromHex("#000000"),
+  red: argbFromHex("#CD0000"),
+  green: argbFromHex("#00CD00"),
+  yellow: argbFromHex("#CDCD00"),
+  blue: argbFromHex("#0000EE"),
+  purple: argbFromHex("#CD00CD"),
+  cyan: argbFromHex("#00CDCD"),
+  white: argbFromHex("#E5E5E5"),
+  brightBlack: argbFromHex("#7F7F7F"),
+  brightRed: argbFromHex("#FF0000"),
+  brightGreen: argbFromHex("#00FF00"),
+  brightYellow: argbFromHex("#FFFF00"),
+  brightBlue: argbFromHex("#5C5CFF"),
+  brightPurple: argbFromHex("#FF00FF"),
+  brightCyan: argbFromHex("#00FFFF"),
+  brightWhite: argbFromHex("#FFFFFF"),
+}
+
 class Profile {
   /**
    * @param {string} colorScheme
@@ -106,87 +128,85 @@ function main() {
 
   // Get the theme from a hex color.
   const theme = themeFromSourceColor(sourceColor,
-    // Colors taken from xterm.
-    // https://github.com/xterm-x11/xterm-snapshots/blob/5b7a08a3482b425c97610190228e58b51ac6c39b/vttests/88colors2.pl#L160-L175
     [
       {
         name: ColorName.black,
-        value: argbFromHex("#000000"),
+        value: XtermColors.black,
         blend: true,
       },
       {
         name: ColorName.red,
-        value: argbFromHex("#CD0000"),
+        value: XtermColors.red,
         blend: true,
       },
       {
         name: ColorName.green,
-        value: argbFromHex("#00CD00"),
+        value: XtermColors.green,
         blend: true,
       },
       {
         name: ColorName.yellow,
-        value: argbFromHex("#CDCD00"),
+        value: XtermColors.yellow,
         blend: true,
       },
       {
         name: ColorName.blue,
-        value: argbFromHex("#0000EE"),
+        value: XtermColors.blue,
         blend: true,
       },
       {
         name: ColorName.purple,
-        value: argbFromHex("#CD00CD"),
+        value: XtermColors.purple,
         blend: true,
       },
       {
         name: ColorName.cyan,
-        value: argbFromHex("#00CDCD"),
+        value: XtermColors.cyan,
         blend: true,
       },
       {
         name: ColorName.white,
-        value: argbFromHex("#E5E5E5"),
+        value: XtermColors.white,
         blend: true,
       },
       {
         name: ColorName.brightBlack,
-        value: argbFromHex("#7F7F7F"),
+        value: XtermColors.brightBlack,
         blend: true,
       },
       {
         name: ColorName.brightRed,
-        value: argbFromHex("#FF0000"),
+        value: XtermColors.brightRed,
         blend: true,
       },
       {
         name: ColorName.brightGreen,
-        value: argbFromHex("#00FF00"),
+        value: XtermColors.brightGreen,
         blend: true,
       },
       {
         name: ColorName.brightYellow,
-        value: argbFromHex("#FFFF00"),
+        value: XtermColors.brightYellow,
         blend: true,
       },
       {
         name: ColorName.brightBlue,
-        value: argbFromHex("#5C5CFF"),
+        value: XtermColors.brightBlue,
         blend: true,
       },
       {
         name: ColorName.brightPurple,
-        value: argbFromHex("#FF00FF"),
+        value: XtermColors.brightPurple,
         blend: true,
       },
       {
         name: ColorName.brightCyan,
-        value: argbFromHex("#00FFFF"),
+        value: XtermColors.brightCyan,
         blend: true,
       },
       {
         name: ColorName.brightWhite,
-        value: argbFromHex("#FFFFFF"),
+        value: XtermColors.brightWhite,
         blend: true,
       },
     ]);

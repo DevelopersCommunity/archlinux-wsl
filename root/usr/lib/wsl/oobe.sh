@@ -4,16 +4,6 @@
 
 set -ue
 
-DEFAULT_UID='1000'
-
-echo 'Please create a default UNIX user account. The username does not need to match your Windows username.'
-echo 'For more information visit: https://aka.ms/wslusers'
-
-if getent passwd "${DEFAULT_UID}" >/dev/null; then
-  echo 'User account already exists, skipping creation'
-  exit 0
-fi
-
 # https://man.archlinux.org/man/machine-id.5
 systemd-machine-id-setup --commit
 # https://wiki.archlinux.org/title/Reflector
@@ -26,6 +16,16 @@ systemctl enable chronyd.service
 pacman-key --init
 pacman-key --populate archlinux
 pacman -S --noconfirm --needed archlinux-keyring
+
+DEFAULT_UID='1000'
+
+echo 'Please create a default UNIX user account. The username does not need to match your Windows username.'
+echo 'For more information visit: https://aka.ms/wslusers'
+
+if getent passwd "${DEFAULT_UID}" >/dev/null; then
+  echo 'User account already exists, skipping creation'
+  exit 0
+fi
 
 while true; do
   # Prompt for the username

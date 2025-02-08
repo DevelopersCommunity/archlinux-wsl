@@ -12,11 +12,10 @@ distribution.
 ## Requirements
 
 You need [WSL release 2.4.4 or higher](https://github.com/microsoft/WSL/releases)
-to use this installation method. To install a pre-release version of WSL, run
-the following command:
+to use this installation method. To update WSL, run the following command:
 
 ```powershell
-wsl --update --pre-release
+wsl --update
 ```
 
 To build the distribution, you need the following tools:

@@ -67,22 +67,22 @@ class Scheme {
     this.background = hexFromArgb(scheme.surface);
     this.selectionBackground = hexFromArgb(scheme.surfaceVariant);
     this.foreground = hexFromArgb(scheme.onSurface);
-    this.black = Scheme.findColor(theme.customColors, ColorName.black, isDark);
+    this.black = hexFromArgb(theme.palettes.neutral.tone(5));
     this.red = Scheme.findColor(theme.customColors, ColorName.red, isDark);
     this.green = Scheme.findColor(theme.customColors, ColorName.green, isDark);
     this.yellow = Scheme.findColor(theme.customColors, ColorName.yellow, isDark);
     this.blue = Scheme.findColor(theme.customColors, ColorName.blue, isDark);
     this.purple = Scheme.findColor(theme.customColors, ColorName.purple, isDark);
     this.cyan = Scheme.findColor(theme.customColors, ColorName.cyan, isDark);
-    this.white = Scheme.findColor(theme.customColors, ColorName.white, isDark);
-    this.brightBlack = Scheme.findColor(theme.customColors, ColorName.brightBlack, isDark);
+    this.white = hexFromArgb(theme.palettes.neutral.tone(80));
+    this.brightBlack = hexFromArgb(theme.palettes.neutral.tone(20));
     this.brightRed = Scheme.findColor(theme.customColors, ColorName.brightRed, isDark);
     this.brightGreen = Scheme.findColor(theme.customColors, ColorName.brightGreen, isDark);
     this.brightYellow = Scheme.findColor(theme.customColors, ColorName.brightYellow, isDark);
     this.brightBlue = Scheme.findColor(theme.customColors, ColorName.brightBlue, isDark);
     this.brightPurple = Scheme.findColor(theme.customColors, ColorName.brightPurple, isDark);
     this.brightCyan = Scheme.findColor(theme.customColors, ColorName.brightCyan, isDark);
-    this.brightWhite = Scheme.findColor(theme.customColors, ColorName.brightWhite, isDark);
+    this.brightWhite = hexFromArgb(theme.palettes.neutral.tone(95));
   }
 
   /**

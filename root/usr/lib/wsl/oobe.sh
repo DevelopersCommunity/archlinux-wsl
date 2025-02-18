@@ -15,7 +15,7 @@ systemctl enable chronyd.service
 # https://wiki.archlinux.org/title/Pacman/Package_signing#Initializing_the_keyring
 pacman-key --init
 pacman-key --populate archlinux
-pacman -S --noconfirm --needed archlinux-keyring
+pacman -Sy --noconfirm --needed archlinux-keyring
 
 DEFAULT_UID='1000'
 

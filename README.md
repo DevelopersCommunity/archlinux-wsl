@@ -1,3 +1,11 @@
+# Archived
+
+Use the official distribution
+
+```powershell
+wsl --install archlinux
+```
+
 # Custom Arch Linux distribution for WSL
 
 This is an automated script to create an [Arch Linux](https://archlinux.org)
